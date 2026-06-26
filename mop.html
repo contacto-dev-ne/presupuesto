@@ -200,7 +200,7 @@
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     <span>Información del Periodo</span>
                 </div>
-                <p id="period-info-label" class="text-slate-600 font-medium font-semibold font-semibold">Cargando...</p>
+                <p id="period-info-label" class="text-slate-600 font-medium font-semibold">Cargando...</p>
             </div>
         </aside>
 
@@ -975,36 +975,6 @@
             });
         }
 
-        // --- NORMALIZADOR DE CABECERAS PARA EVITAR PROBLEMAS DE ACENTOS Y MAYÚSCULAS ---
-        function normalizeHeader(str) {
-            if (!str) return "";
-            return str.toString()
-                .trim()
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, ""); 
-        }
-
-        // --- PROCESADOR DE NÚMEROS ROBUSTO ---
-        function parseNumeric(val) {
-            if (val === undefined || val === null || val === '') return 0;
-            let s = val.toString().trim();
-            s = s.replace(/[\$\s%]/g, '');
-            
-            if (s.includes(',') && s.includes('.')) {
-                if (s.indexOf('.') < s.indexOf(',')) {
-                    s = s.replace(/\./g, '').replace(',', '.');
-                } else {
-                    s = s.replace(/,/g, '');
-                }
-            } else if (s.includes(',')) {
-                s = s.replace(',', '.');
-            }
-            
-            const num = parseFloat(s);
-            return isNaN(num) ? 0 : num;
-        }
-
         // --- MANEJO DE DATOS ---
         function onDataLoaded(autoSelectPeriod = false) {
             const yearsMap = {};
@@ -1055,6 +1025,74 @@
                 activeYear = newestYear;
                 activeMonthIdx = newestMonthIdx;
             }
+        }
+
+        // RENDERIZADORES DE SELECTORES
+        function renderYearSelectors() {
+            const container = document.getElementById('filter-years-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            yearsList.forEach(yr => {
+                const isSelected = (yr === activeYear);
+                const btn = document.createElement('button');
+                btn.className = `py-1.5 px-2 rounded-lg text-xs font-bold transition-all border text-center ${
+                    isSelected 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`;
+                btn.textContent = yr;
+                btn.onclick = () => {
+                    activeYear = yr;
+                    renderYearSelectors();
+                    renderMonthSelectors();
+                    applyFilters();
+                    showToast(`Año cambiado a ${yr}`, "fa-solid fa-calendar text-blue-500");
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderMonthSelectors() {
+            const container = document.getElementById('filter-months-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            MONTH_NAMES.forEach((mName, mIdx) => {
+                const isSelected = (mIdx === activeMonthIdx);
+                const btn = document.createElement('button');
+                
+                // Un mes tiene datos si existe un reporte real con fecha_ejecucion asignada a este año/mes
+                const hasData = currentDataset.some(row => row.rowYear === activeYear && row.rowMonthIdx === mIdx);
+
+                btn.className = `py-1.5 px-1 rounded-lg text-[10px] font-semibold transition-all border text-center relative ${
+                    isSelected 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm z-10' 
+                    : hasData 
+                        ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100 font-bold' 
+                        : 'bg-slate-100 text-slate-300 border-slate-100 opacity-40 cursor-not-allowed'
+                }`;
+                
+                btn.textContent = mName.substring(0, 3);
+                
+                if (hasData && !isSelected) {
+                    const dot = document.createElement('span');
+                    dot.className = "absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full";
+                    btn.appendChild(dot);
+                }
+
+                btn.onclick = () => {
+                    if (!hasData) {
+                        showToast(`No existen planillas reportadas en ${mName} de ${activeYear}.`, "fa-solid fa-circle-exclamation text-amber-500");
+                        return;
+                    }
+                    activeMonthIdx = mIdx;
+                    renderMonthSelectors();
+                    applyFilters();
+                    showToast(`Mes cambiado a ${mName}`, "fa-solid fa-calendar-days text-blue-500");
+                };
+                container.appendChild(btn);
+            });
         }
 
         // --- CREADOR DE DATOS SIMULADOS (MOCK) ---
@@ -1416,56 +1454,6 @@
             }
 
             renderTable();
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-region').value = "";
-            document.getElementById('filter-servicio').value = "";
-            document.getElementById('filter-provincia').value = "";
-            document.getElementById('filter-comuna').value = "";
-            document.getElementById('filter-estado').value = "";
-            document.getElementById('filter-gasto').value = "";
-            document.getElementById('filter-ajuste').value = "";
-            document.getElementById('table-search').value = "";
-            
-            document.getElementById('filter-socio-container').classList.add('opacity-40', 'pointer-events-none');
-            document.getElementById('filter-socio-container').classList.remove('bg-amber-100/70');
-            document.getElementById('filter-socio').value = "";
-
-            filterPeriodoPresupuestario = "";
-            setPeriodoPresupuestario('');
-            
-            selectMostRecentPeriod();
-            renderYearSelectors();
-            renderMonthSelectors();
-            applyFilters();
-            showToast("Todos los filtros se restablecieron", "fa-solid fa-arrow-rotate-left text-blue-500");
-        }
-
-        // --- PESTAÑAS (TABS) ---
-        function switchTab(tab) {
-            activeTab = tab;
-            const btnDash = document.getElementById('tab-btn-dashboard');
-            const btnHist = document.getElementById('tab-btn-historical');
-            const contentDash = document.getElementById('tab-content-dashboard');
-            const contentHist = document.getElementById('tab-content-historical');
-
-            if (tab === 'dashboard') {
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentDash.classList.remove('hidden');
-                contentHist.classList.add('hidden');
-                updatePeriodKPIs();
-                renderDashboardCharts();
-                renderCrossTable();
-            } else {
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentHist.classList.remove('hidden');
-                contentDash.classList.add('hidden');
-                updateHistoricalKPIsAndTable();
-                renderHistoricalCharts();
-            }
         }
 
         // --- TAB 1: OPERACIONES DEL PERIODO SELECCIONADO (KPIs) ---
