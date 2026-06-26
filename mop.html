@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecución Presupuestaria MOP | Dashboard</title>
+    
+    <!-- Meta tag for Open Graph (Miniatura) -->
+    <meta property="og:title" content="Visualizador Ejecución Presupuestaria MOP">
+    <meta property="og:description" content="Módulo de análisis y seguimiento de iniciativas de inversión del MOP.">
+    <meta property="og:image" content="https://cchc.cl/documents/431409/0/logoCChC.png/002fea99-2039-beec-02a7-a92335532d6f?t=1695346405910">
+    <meta property="og:url" content="#">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Babel para transpilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' },
+                        brand: { DEFAULT: '#00306b' }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(99, 102, 241, 0.3)',
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- IMPORT MAP: Configurado para usar Recharts sin errores -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "recharts": "https://esm.sh/recharts@2.12.0?deps=react@18.2.0,react-dom@18.2.0",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1?deps=react@18.2.0,react-dom@18.2.0"
+        }
+    }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        .shimmer {
+            background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Loader inicial visible */
+        #root:empty::before {
+            content: 'Iniciando sistema...';
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            color: #64748b;
+            font-family: sans-serif;
+            font-size: 1.2rem;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="text-slate-800 antialiased h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+    
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useMemo, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+        import { 
+            LayoutDashboard, Database, Filter, Calendar, ChevronDown, Check, Search, Building2, Wallet, TrendingUp, Menu, X, ArrowRight, ExternalLink, MapPin, Map as MapIcon, DollarSign
+        } from 'lucide-react';
+
+        const COLORS = ['#4f46e5', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#14b8a6', '#0ea5e9', '#d946ef'];
+        
+        const formatMoney = (v) => `$${new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v)} MM`;
+        const parseChileanNumber = (str) => {
+            if (!str) return 0;
+            let clean = String(str).replace(/[^0-9,.-]/g, '');
+            if (clean.includes(',')) {
+                clean = clean.replace(/\./g, '').replace(',', '.');
+            } else if ((clean.match(/\./g) || []).length > 1) {
+                clean = clean.replace(/\./g, '');
+            }
+            const num = parseFloat(clean);
+            return isNaN(num) ? 0 : num;
+        };
+
+        // ==========================================
+        // COMPONENTES UI AUXILIARES
+        // ==========================================
+        const SkeletonTable = () => (
+            <div className="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden">
+                <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <div className="h-5 w-48 bg-slate-200 rounded shimmer"></div>
+                </div>
+                <div className="p-6 space-y-4">
+                    {[1,2,3,4,5].map(i => (
+                        <div key={i} className="flex gap-4">
+                            <div className="h-4 w-1/4 bg-slate-100 rounded shimmer"></div>
+                            <div className="h-4 w-1/4 bg-slate-100 rounded shimmer"></div>
+                            <div className="h-4 w-1/6 bg-slate-100 rounded shimmer"></div>
+                            <div className="h-4 w-1/6 bg-slate-100 rounded shimmer"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const KPICard = ({ title, value, subtext, icon: Icon, colorClass, bgClass, delay = 0 }) => (
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 hover:border-indigo-100 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300 group relative overflow-hidden animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
+                <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-500 ${bgClass.replace('bg-', 'bg-')}`}></div>
+                <div className="flex justify-between items-start relative z-10">
+                    <div>
+                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-2">{title}</p>
+                        <h3 className="text-2xl font-bold text-slate-800 tracking-tight group-hover:text-indigo-700 transition-colors">{value}</h3>
+                        {subtext && (<p className="text-[9px] text-slate-400 mt-1 flex items-center gap-1 font-medium">{subtext}</p>)}
+                    </div>
+                    <div className={`p-3 rounded-2xl ${bgClass} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-inner`}>
+                        <Icon size={20} className={colorClass} strokeWidth={2.5} />
+                    </div>
+                </div>
+            </div>
+        );
+
+        const MultiSelect = ({ options, selected, onChange, label, icon: Icon }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const containerRef = useRef(null);
+            useEffect(() => {
+                const handleClickOutside = (e) => { if (containerRef.current && !containerRef.current.contains(e.target)) setIsOpen(false); };
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
+            const isAllSelected = selected.length === options.length && options.length > 0;
+            const toggleOption = (opt) => selected.includes(opt) ? onChange(selected.filter(i => i !== opt)) : onChange([...selected, opt]);
+            const getSummary = () => {
+                if (selected.length === 0 || (isAllSelected && options.length > 0)) return `Todos`;
+                if (selected.length === 1) return selected[0];
+                return `${selected.length} seleccionados`;
+            };
+            return (
+                <div className="relative group" ref={containerRef}>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">{label}</label>
+                    <button onClick={() => setIsOpen(!isOpen)} className={`w-full bg-slate-800/50 border ${isOpen ? 'border-indigo-500 ring-1 ring-indigo-500/50' : 'border-slate-700 group-hover:border-slate-600'} rounded-xl py-2 px-3 text-sm flex justify-between items-center transition-all text-slate-200 backdrop-blur-sm`}>
+                        <div className="flex items-center gap-2.5 overflow-hidden">{Icon && <Icon size={14} className={`${isOpen ? 'text-indigo-400' : 'text-slate-400'} flex-shrink-0 transition-colors`} />}<span className="truncate font-medium text-xs">{getSummary()}</span></div>
+                        <ChevronDown size={14} className={`text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180 text-indigo-400' : ''}`} />
+                    </button>
+                    {isOpen && (
+                        <div className="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-xl shadow-xl shadow-slate-900/10 max-h-64 overflow-y-auto custom-scrollbar animate-fade-in">
+                            <div className="sticky top-0 bg-slate-50/95 backdrop-blur-md border-b border-slate-100 p-2 cursor-pointer hover:bg-slate-100 transition-colors z-10" onClick={() => isAllSelected ? onChange([]) : onChange([...options])}>
+                                <div className="flex items-center gap-3 px-2 py-1"><div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-200 ${isAllSelected ? 'bg-indigo-600 border-indigo-600 shadow-sm' : 'bg-white border-slate-300'}`}>{isAllSelected && <Check size={12} className="text-white" strokeWidth={3} />}</div><span className="text-xs font-bold text-indigo-900">Seleccionar Todo</span></div>
+                            </div>
+                            <div className="p-1.5">{options.map(opt => (<div key={opt} className="flex items-center gap-3 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors" onClick={() => toggleOption(opt)}><div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-200 ${selected.includes(opt) ? 'bg-indigo-500 border-indigo-500 shadow-sm' : 'bg-white border-slate-300'}`}>{selected.includes(opt) && <Check size={10} className="text-white" strokeWidth={3} />}</div><span className={`text-xs ${selected.includes(opt) ? 'text-indigo-900 font-medium' : 'text-slate-600'}`}>{opt}</span></div>))}</div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ==========================================
+        // PORTADA
+        // ==========================================
+        const LandingPage = ({ onEnter }) => {
+            return (
+                <div className="h-screen w-full bg-brand relative overflow-hidden flex flex-col items-center justify-center text-white font-sans">
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+                        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
+                        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
+                        <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"></div>
+                        <div className="absolute inset-0 bg-slate-900/30"></div>
+                    </div>
+
+                    <div className="relative z-10 text-center px-4 max-w-3xl mx-auto flex flex-col items-center">
+                        <div className="mb-8 inline-flex p-5 bg-white rounded-3xl shadow-2xl shadow-indigo-500/20 animate-fade-in">
+                            <img src="https://cchc.cl/documents/431409/0/logoCChC.png/002fea99-2039-beec-02a7-a92335532d6f?t=1695346405910" alt="CChC" className="h-14 w-auto object-contain" />
+                        </div>
+
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white animate-fade-in" style={{animationDelay: '100ms'}}>
+                            Iniciativas de Inversión Programadas y en Ejecución MOP
+                        </h1>
+                        
+                        <p className="text-base md:text-lg text-indigo-100 font-light tracking-wide mb-10 animate-fade-in max-w-2xl text-center" style={{animationDelay: '200ms'}}>
+                            Detalle de las iniciativas de inversión de financiamiento sectorial del MOP programadas para el año en curso. Datos centralizados provenientes de Dirplan MOP.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{animationDelay: '300ms'}}>
+                            <button onClick={onEnter} className="group relative px-8 py-3.5 bg-white text-indigo-950 font-bold rounded-xl shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all duration-300 flex items-center gap-3 overflow-hidden">
+                                <span className="relative z-10">INGRESAR AL VISUALIZADOR</span>
+                                <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="absolute bottom-8 left-0 w-full text-center text-[10px] text-white/50 font-mono z-10 uppercase tracking-widest">
+                        Cámara Chilena de la Construcción • Sede Maule <br/>
+                        Fuente: Dirplan MOP
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // DASHBOARD
+        // ==========================================
+        const Dashboard = ({ onBack }) => {
+            const [data, setData] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            
+            // Filtros
+            const [selectedRegiones, setSelectedRegiones] = useState([]);
+            const [selectedServicios, setSelectedServicios] = useState([]);
+            const [selectedEstados, setSelectedEstados] = useState([]);
+            const [selectedPeriodos, setSelectedPeriodos] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+
+            // Paginacion
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 10;
+
+            useEffect(() => {
+                const loadData = async () => {
+                    try {
+                        const response = await fetch('datos_ejecucion.json');
+                        if (!response.ok) throw new Error('No se pudo cargar el archivo de datos');
+                        let jsonData = await response.json();
+                        
+                        // Parsear datos si vienen en string
+                        jsonData = jsonData.map(item => ({
+                            ...item,
+                            presupuesto_ejecutado: parseChileanNumber(item.presupuesto_ejecutado_millones_de_pesos),
+                            programado_mas_pagado: parseChileanNumber(item['programado_mas_pagado_año']),
+                            monto_vigente: parseChileanNumber(item.monto_vigente_contr),
+                            saldo: parseChileanNumber(item.Saldo),
+                            pagado_anio: parseChileanNumber(item['pagado_año'])
+                        }));
+                        
+                        setData(jsonData);
+                    } catch (err) {
+                        setError(err.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                loadData();
+            }, []);
+
+            // Extracción de opciones únicas
+            const regiones = useMemo(() => [...new Set(data.map(d => d.reg_proyecto).filter(Boolean))].sort(), [data]);
+            const servicios = useMemo(() => [...new Set(data.map(d => d['Dirección/Servicio/subdirección']).filter(Boolean))].sort(), [data]);
+            const estados = useMemo(() => [...new Set(data.map(d => d.Estado).filter(Boolean))].sort(), [data]);
+            const periodos = useMemo(() => [...new Set(data.map(d => d.Periodo_presupuestario).filter(Boolean))].sort(), [data]);
+
+            // Set inicial de todos los filtros
+            useEffect(() => {
+                if (data.length > 0 && selectedRegiones.length === 0) {
+                    setSelectedRegiones(regiones);
+                    setSelectedServicios(servicios);
+                    setSelectedEstados(estados);
+                    setSelectedPeriodos(periodos);
+                }
+            }, [data, regiones, servicios, estados, periodos]);
+
+            // Filtrado de datos
+            const filteredData = useMemo(() => {
+                return data.filter(item => {
+                    const matchRegion = selectedRegiones.length === 0 || selectedRegiones.includes(item.reg_proyecto);
+                    const matchServicio = selectedServicios.length === 0 || selectedServicios.includes(item['Dirección/Servicio/subdirección']);
+                    const matchEstado = selectedEstados.length === 0 || selectedEstados.includes(item.Estado);
+                    const matchPeriodo = selectedPeriodos.length === 0 || selectedPeriodos.includes(item.Periodo_presupuestario);
+                    const matchSearch = !searchTerm || 
+                        (item.nombre_IDI && item.nombre_IDI.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                        (item.Bip && String(item.Bip).toLowerCase().includes(searchTerm.toLowerCase())) ||
+                        (item.nombre_contratista && item.nombre_contratista.toLowerCase().includes(searchTerm.toLowerCase()));
+                    
+                    return matchRegion && matchServicio && matchEstado && matchPeriodo && matchSearch;
+                });
+            }, [data, selectedRegiones, selectedServicios, selectedEstados, selectedPeriodos, searchTerm]);
+
+            // Cálculos KPIs
+            const totalProgramadoMasPagado = filteredData.reduce((acc, curr) => acc + curr.programado_mas_pagado, 0);
+            const totalEjecutado = filteredData.reduce((acc, curr) => acc + curr.presupuesto_ejecutado, 0);
+            const totalMontoVigente = filteredData.reduce((acc, curr) => acc + curr.monto_vigente, 0);
+            const avancePorcentaje = totalMontoVigente > 0 ? ((totalEjecutado / totalMontoVigente) * 100).toFixed(1) : 0;
+            const proyectosConAvance = filteredData.filter(d => d.presupuesto_ejecutado > 0).length;
+
+            // Datos para Gráfico: Inversión por Servicio
+            const chartServicios = useMemo(() => {
+                const map = {};
+                filteredData.forEach(d => {
+                    const s = d['Dirección/Servicio/subdirección'] || 'Sin Servicio';
+                    map[s] = (map[s] || 0) + d.presupuesto_ejecutado;
+                });
+                return Object.entries(map).map(([name, value]) => ({ name, value })).filter(d => d.value > 0).sort((a,b) => b.value - a.value).slice(0, 10);
+            }, [filteredData]);
+
+            // Datos para Gráfico: Estado de Proyectos
+            const chartEstados = useMemo(() => {
+                const map = {};
+                filteredData.forEach(d => {
+                    const e = d.Estado || 'Sin Estado';
+                    map[e] = (map[e] || 0) + 1;
+                });
+                return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+            }, [filteredData]);
+
+            // Paginación
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+            const exportToCSV = () => {
+                if (filteredData.length === 0) return;
+                const headers = Object.keys(filteredData[0]).join(",");
+                const csv = [
+                    headers,
+                    ...filteredData.map(row => Object.values(row).map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+                ].join("\n");
+                
+                const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Ejecucion_MOP_Export_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+                        <h2 className="text-xl font-medium tracking-widest text-slate-300">Cargando Datos Dirplan MOP...</h2>
+                    </div>
+                );
+            }
+
+            if (error) {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-4">
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 max-w-md text-center">
+                            <X className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                            <h2 className="text-xl font-bold text-red-400 mb-2">Error de Carga</h2>
+                            <p className="text-sm text-slate-400 mb-6">{error}</p>
+                            <button onClick={onBack} className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-lg transition-colors">Volver</button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-800">
+                    {/* SIDEBAR */}
+                    <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl lg:shadow-none`}>
+                        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-white p-1.5 rounded-lg"><img src="https://cchc.cl/documents/431409/0/logoCChC.png" alt="CChC" className="h-6" /></div>
+                                <div>
+                                    <h2 className="font-bold text-sm tracking-tight leading-tight">Ejecución MOP</h2>
+                                    <p className="text-[9px] text-slate-400 font-medium">Dirplan / CChC</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white"><X size={20}/></button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Filter size={16} className="text-indigo-400"/>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Segmentadores</h3>
+                            </div>
+                            
+                            <MultiSelect label="Región" options={regiones} selected={selectedRegiones} onChange={setSelectedRegiones} icon={MapPin} />
+                            <MultiSelect label="Servicio / Dirección" options={servicios} selected={selectedServicios} onChange={setSelectedServicios} icon={Building2} />
+                            <MultiSelect label="Estado de Contrato" options={estados} selected={selectedEstados} onChange={setSelectedEstados} icon={LayoutDashboard} />
+                            <MultiSelect label="Periodo Presupuestario" options={periodos} selected={selectedPeriodos} onChange={setSelectedPeriodos} icon={Calendar} />
+                        </div>
+                        
+                        <div className="p-4 bg-slate-800/50 border-t border-slate-800">
+                            <div className="text-[10px] text-slate-400 text-center leading-relaxed">
+                                Datos estáticos generados a partir de Ejecución Total MOP. Uso exclusivo analítico.
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* MAIN CONTENT */}
+                    <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50 relative">
+                        {/* Header */}
+                        <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-500 hover:text-slate-800 bg-slate-100 p-2 rounded-lg transition-colors"><Menu size={20}/></button>
+                                <div>
+                                    <h1 className="text-lg font-bold text-slate-800 leading-tight">Panel de Control de Inversión Sectorial</h1>
+                                    <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1"><Database size={10} /> Base de datos Dirplan MOP sincronizada</p>
+                                </div>
+                            </div>
+                            <button onClick={onBack} className="text-[11px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                                <LayoutDashboard size={12}/> Portada
+                            </button>
+                        </header>
+
+                        {/* Contenido Scrolleable */}
+                        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
+                            
+                            {/* Búsqueda general rápida */}
+                            <div className="bg-white rounded-2xl shadow-soft border border-slate-100 p-2 flex items-center max-w-2xl mx-auto w-full transition-shadow focus-within:shadow-md focus-within:border-indigo-200">
+                                <Search className="text-slate-400 ml-3 mr-2" size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar por nombre de proyecto, código BIP o contratista..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="flex-1 bg-transparent border-none text-sm focus:outline-none text-slate-700 py-2 placeholder-slate-400"
+                                />
+                                {searchTerm && <button onClick={() => setSearchTerm('')} className="p-1 hover:bg-slate-100 rounded-full mr-2"><X size={14} className="text-slate-400"/></button>}
+                            </div>
+
+                            {/* KPIs */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <KPICard title="Prog. + Pagado" value={formatMoney(totalProgramadoMasPagado)} subtext="En periodo actual" icon={Wallet} colorClass="text-indigo-600" bgClass="bg-indigo-50" delay={100}/>
+                                <KPICard title="Ejecutado (MM$)" value={formatMoney(totalEjecutado)} subtext="Presupuesto ejecutado" icon={TrendingUp} colorClass="text-emerald-600" bgClass="bg-emerald-50" delay={200}/>
+                                <KPICard title="% Avance Total" value={`${avancePorcentaje}%`} subtext="Respecto a Monto Vigente" icon={DollarSign} colorClass="text-amber-600" bgClass="bg-amber-50" delay={300}/>
+                                <KPICard title="Iniciativas" value={filteredData.length} subtext={`${proyectosConAvance} con avance registrado`} icon={Building2} colorClass="text-blue-600" bgClass="bg-blue-50" delay={400}/>
+                            </div>
+
+                            {/* Charts Row */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="bg-white rounded-2xl p-5 shadow-soft border border-slate-100 lg:col-span-2">
+                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2"><Building2 size={14} className="text-indigo-500"/> Inversión Ejecutada por Servicio (Top 10)</h3>
+                                    <div className="h-72 w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartServicios} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                                                <XAxis type="number" tickFormatter={(v) => `$${v.toLocaleString('es-CL')}M`} tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                                <YAxis dataKey="name" type="category" tick={{ fontSize: 9, fill: '#475569' }} width={90} axisLine={false} tickLine={false} />
+                                                <RechartsTooltip 
+                                                    cursor={{ fill: '#f8fafc' }}
+                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontSize: '12px', fontWeight: '500' }}
+                                                    formatter={(value) => [`$${value.toLocaleString('es-CL')} MM`, 'Ejecutado']}
+                                                />
+                                                <Bar dataKey="value" fill="#4f46e5" radius={[0, 4, 4, 0]} barSize={20}>
+                                                    {chartServicios.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                                <div className="bg-white rounded-2xl p-5 shadow-soft border border-slate-100 lg:col-span-1">
+                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2"><LayoutDashboard size={14} className="text-emerald-500"/> Cantidad por Estado</h3>
+                                    <div className="h-72 w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie data={chartEstados} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={2} dataKey="value">
+                                                    {chartEstados.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                                                </Pie>
+                                                <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontSize: '12px', fontWeight: '500' }}/>
+                                                <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }}/>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tabla de Datos */}
+                            <div className="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden flex flex-col relative z-10">
+                                <div className="p-4 md:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">Listado Detallado de Iniciativas</h3>
+                                        <p className="text-[10px] text-slate-500 mt-1">{filteredData.length} proyectos encontrados según filtros actuales.</p>
+                                    </div>
+                                    <button onClick={exportToCSV} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm">
+                                        Descargar CSV
+                                    </button>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse whitespace-nowrap">
+                                        <thead>
+                                            <tr className="bg-white text-[10px] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100">
+                                                <th className="p-4 font-bold">BIP / ID</th>
+                                                <th className="p-4 font-bold">Nombre IDI</th>
+                                                <th className="p-4 font-bold">Servicio</th>
+                                                <th className="p-4 font-bold">Región</th>
+                                                <th className="p-4 font-bold text-right">Monto Vigente</th>
+                                                <th className="p-4 font-bold text-right">Ejecutado</th>
+                                                <th className="p-4 font-bold text-center">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-50 text-xs text-slate-600">
+                                            {currentData.length > 0 ? currentData.map((row, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="p-4 font-mono text-indigo-600 font-medium">{row.Bip || '-'}</td>
+                                                    <td className="p-4 font-medium text-slate-800 max-w-xs truncate" title={row.nombre_IDI}>{row.nombre_IDI || 'Sin Nombre'}</td>
+                                                    <td className="p-4">{row['Dirección/Servicio/subdirección'] || '-'}</td>
+                                                    <td className="p-4">{row.reg_proyecto || '-'}</td>
+                                                    <td className="p-4 text-right font-medium">{formatMoney(row.monto_vigente)}</td>
+                                                    <td className="p-4 text-right font-bold text-emerald-600">{formatMoney(row.presupuesto_ejecutado)}</td>
+                                                    <td className="p-4 text-center">
+                                                        <span className={`px-2 py-1 rounded border text-[10px] font-bold ${row.Estado ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                                                            {row.Estado || 'N/A'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan="7" className="p-8 text-center text-slate-400 font-medium text-sm">No hay iniciativas que coincidan con la búsqueda.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="p-4 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500">
+                                        <span>Página {currentPage} de {totalPages}</span>
+                                        <div className="flex gap-1">
+                                            <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-3 py-1.5 rounded border border-slate-200 disabled:opacity-50 hover:bg-slate-50 transition-colors">Anterior</button>
+                                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-3 py-1.5 rounded border border-slate-200 disabled:opacity-50 hover:bg-slate-50 transition-colors">Siguiente</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="h-6"></div> {/* spacer */}
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // APP ENTRY POINT
+        // ==========================================
+        const App = () => {
+            const [view, setView] = useState('landing');
+            return view === 'landing' ? <LandingPage onEnter={() => setView('dashboard')} /> : <Dashboard onBack={() => setView('landing')} />;
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
