@@ -200,7 +200,7 @@
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     <span>Información del Periodo</span>
                 </div>
-                <p id="period-info-label" class="text-slate-600 font-medium font-semibold">Cargando...</p>
+                <p id="period-info-label" class="text-slate-600 font-medium font-semibold font-semibold">Cargando...</p>
             </div>
         </aside>
 
@@ -241,7 +241,7 @@
                                 <i class="fa-solid fa-handshake-angle text-xl"></i>
                             </div>
                             <div>
-                                <p id="maule-kpi-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-bold">Participación Socio Empresa</p>
+                                <p id="maule-kpi-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-semibold">Participación Socio Empresa</p>
                                 <h4 id="maule-kpi-participation" class="text-base font-extrabold text-amber-800">0%</h4>
                                 <p id="maule-kpi-participation-sub" class="text-[10px] text-slate-500">De la inversión regional ejecutada en el periodo</p>
                             </div>
@@ -677,11 +677,10 @@
             let year = 2021;
             let loadedRows = [];
             let consecutiveFailures = 0;
-            const maxFailuresAllowed = 2; // Detiene la búsqueda de años nuevos tras 2 fallos consecutivos (ej. si no hay 2027)
+            const maxFailuresAllowed = 2; // Detiene la búsqueda de años nuevos tras 2 fallos consecutivos
 
             while (consecutiveFailures < maxFailuresAllowed) {
                 const fileName = `datos_${year}.json.gz`;
-                // Si la URL termina en / la acoplamos, sino usamos relative path
                 const url = baseUrl ? `${baseUrl}${fileName}` : `./${fileName}`;
                 
                 try {
@@ -692,7 +691,7 @@
                     loadedRows = loadedRows.concat(normalizedRows);
                     consecutiveFailures = 0; // Resetear contador al tener éxito
                 } catch (e) {
-                    console.warn(`No se pudo cargar o descomprimir ${fileName}. Continuando...`);
+                    console.warn(`No se pudo cargar o descomprimir ${fileName}. Continuando... Error detallado:`, e);
                     consecutiveFailures++;
                 }
                 year++;
@@ -705,16 +704,21 @@
             return loadedRows;
         }
 
-        // --- PARSER INTEGRADO PARA SOPORTAR CUALQUIER FORMATO JSON (ARRAY U OBJETOS) ---
+        // --- PARSER INTEGRADO PARA SOPORTAR FORMATOS JSON (ARRAY U OBJETOS) ---
         function parseRawJson(jsonData, yearFallback) {
-            // Soportar wrappers { rows: [...] } o { values: [...] } comunes de conversiones automáticas
-            if (!Array.isArray(jsonData)) {
+            if (!Array.isArray(jsonData) && jsonData !== null && typeof jsonData === 'object') {
                 if (jsonData.rows && Array.isArray(jsonData.rows)) {
                     jsonData = jsonData.rows;
                 } else if (jsonData.values && Array.isArray(jsonData.values)) {
                     jsonData = jsonData.values;
                 } else {
-                    return [];
+                    // Buscar dinámicamente cualquier propiedad que sea un Array (por ej. si se convirtió de Excel a JSON)
+                    const arrayKey = Object.keys(jsonData).find(k => Array.isArray(jsonData[k]));
+                    if (arrayKey) {
+                        jsonData = jsonData[arrayKey];
+                    } else {
+                        return [];
+                    }
                 }
             }
 
@@ -749,11 +753,12 @@
 
             return rowsToProcess.map(row => {
                 return normalizeRow(row, colMap, isArrayOfArrays, yearFallback);
-            });
+            }).filter(r => r !== null);
         }
 
-        // --- NORMALIZADOR DE FILAS (MILES A MILLONES Y EXTRAER FECHAS) ---
+        // --- NORMALIZADOR DE FILAS INDIVIDUALES ---
         function normalizeRow(rawRow, colMap, isArrayOfArrays, yearFallback) {
+            if (!rawRow) return null;
             const item = {};
             const columnsToFindNorm = [
                 'servicio', 'reg_proyecto', 'provincia', 'comuna', 'region_contrato', 'item', 'bip', 'nombre_idi',
@@ -772,7 +777,7 @@
             if (isArrayOfArrays) {
                 columnsToFindNorm.forEach(col => {
                     const idx = colMap[col];
-                    let val = (idx !== -1 && idx < rawRow.length) ? rawRow[idx] : "";
+                    let val = (idx !== undefined && idx !== -1 && idx < rawRow.length) ? rawRow[idx] : "";
                     item[col] = val;
                 });
             } else {
@@ -792,7 +797,7 @@
                 });
             }
 
-            // Convertir campos numéricos
+            // Convertir campos a número de forma segura
             const numericFields = [
                 'presupuesto_oficial', 'monto_vigente_contr', 'porcentaje_ejecucion',
                 'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
@@ -801,8 +806,7 @@
             ];
 
             numericFields.forEach(f => {
-                const val = item[f];
-                item[f] = (typeof val === 'number') ? val : parseNumeric(val);
+                item[f] = parseNumeric(item[f]);
             });
 
             // Extraer el año y mes del reporte de la fecha de ejecución (Mandatorio)
@@ -817,7 +821,7 @@
                 item.year = yearFallback;
             }
 
-            // Unificación de escala (Miles a Millones de pesos) para variables específicas
+            // DIVISIÓN DE MILES A MILLONES PARA COLUMNAS EN MILES:
             const thousandsCols = [
                 'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
                 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
@@ -862,6 +866,81 @@
             return item;
         }
 
+        // --- NORMALIZADOR DE DATASET COMPLETO ---
+        function normalizeDataset(rawList) {
+            return rawList.map(row => {
+                const item = { ...row };
+
+                // Convertir campos a número de forma segura
+                const numericFields = [
+                    'presupuesto_oficial', 'monto_vigente_contr', 'porcentaje_ejecucion',
+                    'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
+                    'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+                    'ano_siguiente', 'saldo', 'presupuesto_ejecutado_millones_de_pesos', 'promedio', 'ajuste_contrato'
+                ];
+
+                numericFields.forEach(f => {
+                    item[f] = (typeof item[f] === 'number') ? item[f] : parseNumeric(item[f]);
+                });
+
+                // Extraer el año y mes del reporte de la fecha de ejecución (Mandatorio)
+                const parsedDate = parseExecutionDate(item.fecha_ejecucion);
+                if (parsedDate) {
+                    item.rowYear = parsedDate.year;
+                    item.rowMonthIdx = parsedDate.monthIdx;
+                    item.year = parsedDate.year; 
+                } else {
+                    item.rowYear = item.year || "S/I";
+                    item.rowMonthIdx = 5; 
+                    item.year = item.rowYear;
+                }
+
+                // DIVISIÓN DE MILES A MILLONES PARA COLUMNAS EN MILES:
+                const thousandsCols = [
+                    'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
+                    'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+                    'ano_siguiente', 'saldo'
+                ];
+
+                thousandsCols.forEach(col => {
+                    item[col] = item[col] / 1000;
+                });
+
+                // Establecer el pagado acumulado real en millones (desde presupuesto_ejecutado_millones_de_pesos)
+                item.pagado_año = item.presupuesto_ejecutado_millones_de_pesos; 
+
+                // Campos comunes y fallbacks de acuerdo con las especificaciones del usuario
+                item.servicio = item['direccion/servicio/subdireccion'] || item.servicio || "Sin Información";
+                item.provincia = item.provincia || item['provincia_contrato'] || "Sin Información";
+                item.comuna = item.comuna || item['comuna_contrato'] || "Sin Información";
+                item.region = item.region || "Sin Información";
+                item.estado = item.estado || "N/A";
+                item.tipo_de_gasto = item.tipo_de_gasto || "Capital";
+                item.bip = item.bip || "Sin BIP";
+                item.id_chilecompra = item.id_chilecompra || item['id_chilecompra'] || "Sin ID";
+                item.nombre_contrato = item.nombre_contrato || item.nombre_idi || "Sin Nombre";
+                item.nombre_contratista = item.nombre_contratista || "Sin Contratista";
+                item.periodo_presupuestario = item.periodo_presupuestario || item['periodo_presupuestario'] || "Arrastre";
+                item.promedio = parseInt(item.promedio) || 0;
+                item.ajuste_contrato = item.ajuste_contrato ? item.ajuste_contrato.toString().trim() : "Sin Ajuste";
+
+                // Normalización de Socio Maule
+                let rawSocio = (item.socio_maule || "").toString().trim();
+                let lowerSocio = rawSocio.toLowerCase();
+                if (lowerSocio.includes("socio empresa") || lowerSocio === "si" || lowerSocio === "sí" || lowerSocio === "socio") {
+                    item.socio_maule = "Socio Empresa";
+                } else if (lowerSocio.includes("no socio") || lowerSocio === "no") {
+                    item.socio_maule = "No socio CChC Maule";
+                } else if (lowerSocio.includes("varios")) {
+                    item.socio_maule = "Varios proveedores";
+                } else {
+                    item.socio_maule = "No hay datos";
+                }
+
+                return item;
+            });
+        }
+
         // --- NORMALIZADOR DE CABECERAS PARA EVITAR PROBLEMAS DE ACENTOS Y MAYÚSCULAS ---
         function normalizeHeader(str) {
             if (!str) return "";
@@ -870,6 +949,193 @@
                 .toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, ""); 
+        }
+
+        // --- PROCESADOR DE NÚMEROS ROBUSTO ---
+        function parseNumeric(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            let s = val.toString().trim();
+            s = s.replace(/[\$\s%]/g, '');
+            
+            if (s.includes(',') && s.includes('.')) {
+                if (s.indexOf('.') < s.indexOf(',')) {
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else {
+                    s = s.replace(/,/g, '');
+                }
+            } else if (s.includes(',')) {
+                s = s.replace(',', '.');
+            }
+            
+            const num = parseFloat(s);
+            return isNaN(num) ? 0 : num;
+        }
+
+        // --- CREADOR DE DATOS SIMULADOS (MOCK) ---
+        function loadDemoData() {
+            const tempRawDataset = [];
+            const servicios = [
+                "Dirección de Vialidad", 
+                "Dirección de Obras Hidráulicas", 
+                "Dirección de Arquitectura", 
+                "Serviu Maule", 
+                "Gobierno Regional"
+            ];
+            const regiones = ["Región del Maule", "Región Metropolitana", "Región de Valparaíso", "Región del Biobío"];
+            const provincias = {
+                "Región del Maule": ["Talca", "Curicó", "Linares", "Cauquenes"],
+                "Región Metropolitana": ["Santiago", "Chacabuco", "Cordillera"],
+                "Región de Valparaíso": ["Valparaíso", "San Antonio"],
+                "Región del Biobío": ["Concepción", "Biobío"]
+            };
+            const comunas = {
+                "Talca": ["Talca", "Constitución", "San Clemente"],
+                "Curicó": ["Curicó", "Molina", "Teno"],
+                "Linares": ["Linares", "Parral", "San Javier"],
+                "Cauquenes": ["Cauquenes", "Chanco", "Pelluhue"],
+                "Santiago": ["Santiago", "Providencia"],
+                "Chacabuco": ["Colina", "Lampa"],
+                "Cordillera": ["Puente Alto"],
+                "Valparaíso": ["Valparaíso", "Viña del Mar"],
+                "San Antonio": ["San Antonio", "Cartagena"],
+                "Concepción": ["Concepción", "Talcahuano"],
+                "Biobío": ["Los Ángeles", "Cabrero"]
+            };
+            const estados = ["En Ejecución", "Licitado", "Terminado", "Paralizado"];
+            const tiposGasto = ["Capital", "Corriente"];
+            const nombresProyectos = [
+                "Reposición Ruta J-60 Sector Lora",
+                "Construcción Colector Lircay Poniente",
+                "Mejoramiento Liceo de Excelencia",
+                "Conservación de Caminos Básicos Sector Melado",
+                "Ampliación Red APR Estero El Parrón",
+                "Habilitación Cuartel de Bomberos Primera Compañía"
+            ];
+            const contratistas = [
+                "Constructora Icafal S.A.",
+                "Echeverría Izquierdo",
+                "Besalco Obras Civiles S.A.",
+                "Sacyr Chile S.A.",
+                "Inversiones y Construcciones Maule Ltda."
+            ];
+            const socioOptions = ["Socio Empresa", "No socio CChC Maule", "Varios proveedores", "No hay datos"];
+            const ajusteOptions = ["Sin Ajuste", "Aumento de Obras", "Disminución de Obras", "Ampliación de Plazo"];
+
+            for (let year = 2021; year <= 2026; year++) {
+                const maxMonthGen = (year === 2026) ? 5 : 11;
+                
+                for (let m = 0; m <= maxMonthGen; m++) {
+                    const numContratos = 8 + Math.floor(Math.random() * 6);
+                    const padMonthStr = (m + 1).toString().padStart(2, '0');
+                    const simulatedReportDate = `${year}-${padMonthStr}-25`;
+
+                    for (let i = 0; i < numContratos; i++) {
+                        const reg = regiones[Math.floor(Math.random() * regiones.length)];
+                        const provs = provincias[reg] || ["General"];
+                        const prov = provs[Math.floor(Math.random() * provs.length)];
+                        const coms = comunas[prov] || ["General Comuna"];
+                        const com = coms[Math.floor(Math.random() * coms.length)];
+                        const serv = servicios[Math.floor(Math.random() * servicios.length)];
+                        const est = estados[Math.floor(Math.random() * estados.length)];
+                        const tg = tiposGasto[Math.floor(Math.random() * tiposGasto.length)];
+                        const bip = `30${Math.floor(100000 + Math.random() * 900000)}`;
+                        const mpId = `${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(10 + Math.random() * 90)}-LP26`;
+                        const projName = nombresProyectos[Math.floor(Math.random() * nombresProyectos.length)] + ` - Etapa ${i+1}`;
+                        const contractor = contratistas[Math.floor(Math.random() * contratistas.length)];
+
+                        const presupuestoOficial = Math.floor(500 + Math.random() * 8000); 
+                        const montoVigente = Math.floor(presupuestoOficial * (0.9 + Math.random() * 0.3));
+                        
+                        const monthProgressFactor = (m + 1) / 12;
+                        const execPercent = 10 + Math.floor(Math.random() * 75 * monthProgressFactor);
+
+                        const totalPagadoAnoMillions = Math.floor(montoVigente * (execPercent / 100));
+                        const totalPagadoAnoThousands = totalPagadoAnoMillions * 1000;
+
+                        const monthlyDistCumulativeThousands = new Array(12).fill(0);
+                        for (let currentM = 0; currentM < 12; currentM++) {
+                            if (currentM <= m) {
+                                monthlyDistCumulativeThousands[currentM] = Math.round((totalPagadoAnoThousands / (m + 1)) * (0.8 + Math.random() * 0.4));
+                            } else {
+                                const remainingMonths = 12 - (m + 1);
+                                const totalProgrammedRemaining = (montoVigente * 1000) - totalPagadoAnoThousands;
+                                monthlyDistCumulativeThousands[currentM] = Math.max(0, Math.round((totalProgrammedRemaining / remainingMonths) * (0.8 + Math.random() * 0.4)));
+                            }
+                        }
+
+                        tempRawDataset.push({
+                            year: year.toString(),
+                            servicio: serv,
+                            reg_proyecto: reg === "Región del Maule" ? "Maule" : "Otra",
+                            provincia: prov,
+                            comuna: com,
+                            region_contrato: reg,
+                            item: "Subtítulo 31",
+                            bip: bip,
+                            nombre_idi: projName,
+                            etapa: year === 2026 ? "Ejecución" : "Diseño y Ejecución",
+                            asignacion: "FNDR",
+                            centro_gestion: "DP11",
+                            codigo_contrato: `CONTR-${100000 + Math.floor(Math.random() * 900000)}`,
+                            nombre_contrato: projName,
+                            a_n: year % 2 === 0 ? "Nuevo" : "Arrastre",
+                            clasificacion: "Obras Civiles",
+                            id_chilecompra: mpId,
+                            estado: est,
+                            tipo_contratacion: "Pública",
+                            fecha_licitacion: `${year}-02-15`,
+                            fecha_apertura: `${year}-03-10`,
+                            fecha_resolucion: `${year}-04-05`,
+                            fecha_tramite: `${year}-04-20`,
+                            fecha_inicio: `${year}-05-01`,
+                            fecha_termino: `${year+1}-12-31`,
+                            provincia_contrato: prov,
+                            comuna_contrato: com,
+                            tipo_reajuste: "Polinómica",
+                            presupuesto_oficial: presupuestoOficial, 
+                            monto_vigente_contr: montoVigente, 
+                            rut_contratista: `76.${Math.floor(100+Math.random()*899)}.${Math.floor(100+Math.random()*899)}-K`,
+                            nombre_contratista: contractor,
+                            porcentaje_ejecucion: 0, 
+                            programado_mas_pagado_ano: montoVigente * 1000, 
+                            pagado_ano: totalPagadoAnoThousands, 
+                            enero: monthlyDistCumulativeThousands[0],
+                            febrero: monthlyDistCumulativeThousands[1],
+                            marzo: monthlyDistCumulativeThousands[2],
+                            abril: monthlyDistCumulativeThousands[3],
+                            mayo: monthlyDistCumulativeThousands[4],
+                            junio: monthlyDistCumulativeThousands[5],
+                            julio: monthlyDistCumulativeThousands[6],
+                            agosto: monthlyDistCumulativeThousands[7],
+                            septiembre: monthlyDistCumulativeThousands[8],
+                            octubre: monthlyDistCumulativeThousands[9],
+                            noviembre: monthlyDistCumulativeThousands[10],
+                            diciembre: monthlyDistCumulativeThousands[11],
+                            ano_siguiente: 0,
+                            saldo: (montoVigente * 1000) - totalPagadoAnoThousands, 
+                            tipo_de_gasto: tg,
+                            fecha_ejecucion: simulatedReportDate, 
+                            region: reg,
+                            region_ord: reg === "Región del Maule" ? "09" : "05",
+                            presupuesto_ejecutado_millones_de_pesos: totalPagadoAnoMillions, 
+                            socio_maule: socioOptions[Math.floor(Math.random() * socioOptions.length)],
+                            "direccion/servicio/subdireccion": serv,
+                            direccion_ord: "01",
+                            ajuste_contrato: ajusteOptions[Math.floor(Math.random() * ajusteOptions.length)], // TEXTO
+                            periodo_presupuestario: Math.random() > 0.4 ? "Arrastre" : "Nuevo",
+                            promedio: Math.random() > 0.3 ? 1 : 0
+                        });
+                    }
+                }
+            }
+
+            currentDataset = normalizeDataset(tempRawDataset);
+
+            const badge = document.getElementById('connection-badge');
+            badge.className = "flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span> Modo Demostración (Offline)`;
+
+            onDataLoaded(true); 
         }
 
         // Accionador manual de Sincronización desde Modal
@@ -1242,6 +1508,7 @@
         function renderCrossTable() {
             const tbody = document.getElementById('cross-table-body');
             const thead = document.getElementById('cross-table-head');
+            if (!tbody || !thead) return;
             tbody.innerHTML = '';
             thead.innerHTML = '';
 
@@ -1341,6 +1608,7 @@
                 const yrPeriodData = filteredDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
 
                 yrPeriodData.forEach(row => {
+                    // El presupuesto pagado + lo programado restante es igual a programado_mas_pagado_ano
                     yrBudget += (row.programado_mas_pagado_ano || 0);
                     yrExecuted += (row.pagado_año || 0);
                 });
@@ -1430,6 +1698,10 @@
                 kpiPct.textContent = `0.0%`;
                 kpiPct.className = "text-xl font-bold mt-1 text-slate-700";
             }
+            
+            const prevYr = parseInt(activeYear) - 1;
+            document.getElementById('historical-kpi-diff-abs-sub').textContent = `${MONTH_NAMES[activeMonthIdx]} (${activeYear} vs ${prevYr})`;
+            document.getElementById('historical-kpi-diff-pct-sub').textContent = `Tasa de aceleración vs ${prevYr}`;
         }
 
         // --- GRÁFICOS TAB 1: ANÁLISIS DE PERIODO (DASHBOARD) ---
