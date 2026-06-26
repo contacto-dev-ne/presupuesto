@@ -704,6 +704,35 @@
             return loadedRows;
         }
 
+        // --- UTILITIES & HELPER FUNCTIONS ---
+        function normalizeHeader(str) {
+            if (!str) return "";
+            return str.toString()
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, ""); 
+        }
+
+        function parseNumeric(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            let s = val.toString().trim();
+            s = s.replace(/[\$\s%]/g, '');
+            
+            if (s.includes(',') && s.includes('.')) {
+                if (s.indexOf('.') < s.indexOf(',')) {
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else {
+                    s = s.replace(/,/g, '');
+                }
+            } else if (s.includes(',')) {
+                s = s.replace(',', '.');
+            }
+            
+            const num = parseFloat(s);
+            return isNaN(num) ? 0 : num;
+        }
+
         // --- EXTRACTOR DE AÑO Y MES DESDE FECHA DE EJECUCIÓN (MANDATORIO) ---
         function parseExecutionDate(dateStr) {
             if (!dateStr) return null;
@@ -1855,96 +1884,6 @@
             document.getElementById('chart-monthly-title').textContent = `Año Presupuestario: ${activeYear}`;
         }
 
-        function renderServicesPeriodBarChart() {
-            const grouped = {};
-            // Filtrar estrictamente para el periodo actual
-            const periodData = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
-
-            periodData.forEach(row => {
-                const s = row.servicio || "Sin Información";
-                if (!grouped[s]) {
-                    grouped[s] = { budget: 0, paid: 0 };
-                }
-                grouped[s].budget += (row.programado_mas_pagado_ano || 0);
-                grouped[s].paid += (row.pagado_año || 0);
-            });
-
-            const labels = Object.keys(grouped);
-            const budgets = labels.map(l => grouped[l].budget);
-            const paids = labels.map(l => grouped[l].paid);
-
-            const ctx = document.getElementById('chart-services').getContext('2d');
-            if (chartServicesInstance) chartServicesInstance.destroy();
-
-            chartServicesInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels.map(l => l.length > 25 ? l.substring(0, 25) + "..." : l),
-                    datasets: [
-                        {
-                            label: 'Presp. Programado + Pagado Año',
-                            data: budgets,
-                            backgroundColor: '#94a3b8'
-                        },
-                        {
-                            label: `Ejecutado Real YTD (${MONTH_NAMES[activeMonthIdx]})`,
-                            data: paids,
-                            backgroundColor: '#3b82f6'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) { return '$' + value.toLocaleString('es-CL') + ' MM$'; }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderTypeExpensePeriodDoughnutChart() {
-            const grouped = {};
-            const periodData = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
-
-            periodData.forEach(row => {
-                const tg = row.tipo_de_gasto || "Sin Clasificación";
-                grouped[tg] = (grouped[tg] || 0) + (row.pagado_año || 0);
-            });
-
-            const labels = Object.keys(grouped);
-            const values = labels.map(l => grouped[l]);
-
-            const ctx = document.getElementById('chart-type-expense').getContext('2d');
-            if (chartTypeExpenseInstance) chartTypeExpenseInstance.destroy();
-
-            chartTypeExpenseInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: ['#6366f1', '#f59e0b', '#ec4899', '#14b8a6']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
         // --- TABLA DE DATOS DETALLADOS DE CONTRATOS ---
         function renderTable() {
             const tbody = document.getElementById('table-body');
@@ -2062,7 +2001,7 @@
                     `"${row.nombre_contrato || ''}"`,
                     `"${row.nombre_contratista || ''}"`,
                     row.monto_vigente_contr,
-                    row.ajuste_contrato,
+                    `"${row.ajuste_contrato || 'Sin Ajuste'}"`,
                     executedYtd,
                     percentValue.toFixed(1),
                     row.rowYear
