@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Ejecución Presupuestaria</title>
+    <title>Visualizador de Ejecución Presupuestaria MOP</title>
+    
+    <meta property="og:title" content="Visualizador Ejecución Presupuestaria MOP">
+    <meta property="og:description" content="Módulo de análisis y seguimiento de iniciativas de inversión del MOP.">
+    <meta property="og:image" content="https://cchc.cl/documents/431409/0/logoCChC.png/002fea99-2039-beec-02a7-a92335532d6f?t=1695346405910">
+    <meta property="og:url" content="#">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,9 +29,9 @@
 
     <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-5"></div>
-        <h2 class="text-xl font-bold tracking-wider mb-2">Conectando con la Base de Datos...</h2>
+        <h2 class="text-xl font-bold tracking-wider mb-2">Cargando Visualizador MOP...</h2>
         <p class="text-xs text-slate-400 max-w-md text-center px-6 leading-relaxed">
-            Consolidando y descomprimiendo en paralelo los registros históricos de Dirplan MOP de forma segura.
+            Descomprimiendo en paralelo los registros históricos de Dirplan MOP de forma segura.
         </p>
     </div>
 
@@ -37,7 +43,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight">Portal de Ejecución Presupuestaria MOP</h1>
-                    <p class="text-xs text-slate-400">Control Financiero & Monitoreo de Contratos</p>
+                    <p class="text-xs text-slate-400">Iniciativas de Inversión Programadas y en Ejecución</p>
                 </div>
             </div>
             
@@ -111,27 +117,27 @@
 
                 <div>
                     <label for="filter-servicio" class="block text-[11px] font-semibold text-slate-600 mb-1">Dirección / Servicio</label>
-                    <select id="filter-servicio" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    <select id="filter-servicio" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium">
                         <option value="">Todas las Direcciones</option>
                     </select>
                 </div>
 
                 <div>
                     <label for="filter-provincia" class="block text-[11px] font-semibold text-slate-600 mb-1">Provincia</label>
-                    <select id="filter-provincia" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:outline-none">
+                    <select id="filter-provincia" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none">
                         <option value="">Todas</option>
                     </select>
                 </div>
 
                 <div>
                     <label for="filter-comuna" class="block text-[11px] font-semibold text-slate-600 mb-1">Comuna</label>
-                    <select id="filter-comuna" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:outline-none">
+                    <select id="filter-comuna" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none">
                         <option value="">Todas</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="filter-estado" class="block text-[11px] font-semibold text-slate-600 mb-1">Estado</label>
+                    <label for="filter-estado" class="block text-[11px] font-semibold text-slate-600 mb-1">Estado del Contrato</label>
                     <select id="filter-estado" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none">
                         <option value="">Todos los Estados</option>
                     </select>
@@ -166,7 +172,7 @@
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     <span>Información del Periodo</span>
                 </div>
-                <p id="period-info-label" class="text-slate-600 font-medium font-semibold">Cargando...</p>
+                <p id="period-info-label" class="text-slate-600 font-medium">Cargando...</p>
             </div>
         </aside>
 
@@ -204,7 +210,7 @@
                                 <i class="fa-solid fa-handshake-angle text-xl"></i>
                             </div>
                             <div>
-                                <p id="maule-kpi-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-bold">Participación Socio Empresa</p>
+                                <p id="maule-kpi-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Participación Socio Empresa</p>
                                 <h4 id="maule-kpi-participation" class="text-base font-extrabold text-amber-800">0%</h4>
                                 <p class="text-[10px] text-slate-500">De la inversión regional ejecutada en el periodo</p>
                             </div>
@@ -214,8 +220,8 @@
                                 <i class="fa-solid fa-calculator text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-semibold">Inversión Promedio por Contrato</p>
-                                <h4 id="maule-kpi-average" class="text-base font-extrabold text-orange-800">$0 MM$</h4>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inversión Promedio por Contrato</p>
+                                <h4 id="maule-kpi-average" class="text-base font-extrabold text-orange-800">$0 MM</h4>
                                 <p class="text-[10px] text-slate-500">Filtrado bajo condición (Promedio = 1)</p>
                             </div>
                         </div>
@@ -228,8 +234,8 @@
                             <i class="fa-solid fa-wallet text-2xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-bold">Prog. + Ejecutado Año</p>
-                            <h3 id="kpi-budget" class="text-xl font-bold text-slate-800">$0 MM$</h3>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Prog. + Ejecutado Año</p>
+                            <h3 id="kpi-budget" class="text-xl font-bold text-slate-800">$0 MM</h3>
                             <p id="kpi-budget-sub" class="text-[10px] text-slate-500">Programado + Pagado en el año</p>
                         </div>
                     </div>
@@ -239,8 +245,8 @@
                             <i class="fa-solid fa-hand-holding-dollar text-2xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-semibold">Ejecutado YTD</p>
-                            <h3 id="kpi-executed" class="text-xl font-bold text-slate-800">$0 MM$</h3>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Ejecutado YTD</p>
+                            <h3 id="kpi-executed" class="text-xl font-bold text-slate-800">$0 MM</h3>
                             <p id="kpi-executed-sub" class="text-[10px] text-slate-500">Ejecutado real a la fecha</p>
                         </div>
                     </div>
@@ -250,7 +256,7 @@
                             <i class="fa-solid fa-percent text-2xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-semibold">% Contratos con Avance</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">% Contratos con Avance</p>
                             <h3 id="kpi-percentage" class="text-xl font-bold text-slate-800">0%</h3>
                             <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1.5">
                                 <div id="kpi-percentage-bar" class="bg-indigo-600 h-1.5 rounded-full" style="width: 0%"></div>
@@ -264,9 +270,9 @@
                             <i class="fa-solid fa-file-contract text-2xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-semibold">Contratos Evaluados</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contratos Evaluados</p>
                             <h3 id="kpi-contracts" class="text-xl font-bold text-slate-800">0</h3>
-                            <p id="kpi-contracts-sub" class="text-[10px] text-slate-500">Reportados in el periodo</p>
+                            <p id="kpi-contracts-sub" class="text-[10px] text-slate-500">Reportados en el periodo</p>
                         </div>
                     </div>
                 </div>
@@ -289,7 +295,7 @@
                         <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                             <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                 <i class="fa-solid fa-building text-blue-500"></i>
-                                Inversión por Dirección / Servicio / Subdirección
+                                Inversión por Dirección / Servicio
                             </h3>
                             <span class="text-xs text-slate-400">Escala en MM$</span>
                         </div>
@@ -303,7 +309,7 @@
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 col-span-1 flex flex-col justify-between">
                         <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                             <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-pie-chart text-blue-500"></i>
+                                <i class="fa-solid fa-chart-pie text-blue-500"></i>
                                 Gasto en el Periodo Seleccionado
                             </h3>
                         </div>
@@ -333,10 +339,9 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Variación Ejecución YoY</p>
-                        <h3 id="historical-kpi-diff-abs" class="text-xl font-bold mt-1 text-slate-800">$0 MM$</h3>
+                        <h3 id="historical-kpi-diff-abs" class="text-xl font-bold mt-1 text-slate-800">$0 MM</h3>
                         <p class="text-[10px] text-slate-500 mt-1">Diferencia respecto al año anterior</p>
                     </div>
-
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">% Variación YoY</p>
                         <h3 id="historical-kpi-diff-pct" class="text-xl font-bold mt-1 text-slate-800">0%</h3>
@@ -382,7 +387,6 @@
                             <canvas id="chart-historical-comparison"></canvas>
                         </div>
                     </div>
-
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                         <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                             <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -407,13 +411,11 @@
                         </h3>
                         <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
                     </div>
-                    
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="relative">
                             <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar contratista, BIP, ID..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all w-56">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                         </div>
-                        
                         <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
                             <i class="fa-solid fa-file-excel text-emerald-600"></i>
                             <span>Exportar CSV</span>
@@ -448,7 +450,6 @@
                     </div>
                 </div>
             </div>
-
         </section>
     </main>
 
@@ -473,7 +474,6 @@
         let activeMonthIdx = 0; 
 
         let filterPeriodoPresupuestario = ""; 
-
         let currentPage = 1;
         const rowsPerPage = 10;
         let activeTab = 'dashboard';
@@ -488,32 +488,35 @@
             cargarDatosDesdeGz();
         });
 
-        // MOTOR DE ARRANQUE MÁGICO: Fetch + Descompresión GZIP en paralelo por año (Bypassea el límite de 25MB de GitHub web)
+        // LÓGICA DE BÚSQUEDA DINÁMICA: Calcula los años automáticamente desde 2021 hasta el año real en curso + 1 por escalabilidad
         async function cargarDatosDesdeGz() {
             const overlay = document.getElementById('loading-overlay');
             try {
-                // Lista de años que procesa el Excel
-                const anos = ['2021', '2022', '2023', '2024', '2025', '2026'];
+                const startYear = 2021;
+                const endYear = new Date().getFullYear() + 1; // Crece autónomamente con el tiempo
+                const anos = [];
+                for (let y = startYear; y <= endYear; y++) {
+                    anos.push(y.toString());
+                }
                 
                 const promesas = anos.map(async (ano) => {
                     try {
                         const response = await fetch(`datos_${ano}.json.gz`);
-                        if (!response.ok) return []; // Si un año no se ha creado o no tiene datos, se ignora limpiamente
+                        if (!response.ok) return []; 
                         
                         const ds = new DecompressionStream('gzip');
                         const decompressedStream = response.body.pipeThrough(ds);
                         const jsonText = await new Response(decompressedStream).text();
                         return JSON.parse(jsonText);
                     } catch (e) {
-                        console.warn(`Omitiendo año ${ano}:`, e);
                         return [];
                     }
                 });
                 
                 const resultados = await Promise.all(promesas);
-                const rawData = resultados.flat(); // Unifica las listas de todos los años en una sola gran base de datos
+                const rawData = resultados.flat(); 
                 
-                if (rawData.length === 0) throw new Error("No se encontraron archivos de datos válidos.");
+                if (rawData.length === 0) throw new Error("No se encontraron archivos de datos.");
                 
                 currentDataset = normalizeDataset(rawData);
                 onDataLoaded(true);
@@ -525,7 +528,7 @@
                 overlay.innerHTML = `<div class='text-center p-6 bg-white text-slate-800 rounded-xl shadow-lg border border-red-100 max-w-sm'>
                     <i class='fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-2'></i>
                     <h3 class='font-bold text-sm'>Error al cargar base de datos</h3>
-                    <p class='text-xs text-slate-500 mt-1'>Asegúrate de que los archivos por año (ej: datos_2024.json.gz) estén subidos en tu repositorio.</p>
+                    <p class='text-xs text-slate-500 mt-1'>Asegúrate de ejecutar el script Python en tu PC y subir los archivos por año generados.</p>
                 </div>`;
             }
         }
@@ -537,9 +540,7 @@
 
         function parseNumeric(val) {
             if (val === undefined || val === null || val === '') return 0;
-            let s = val.toString().trim();
-            s = s.replace(/[\$\s%]/g, '');
-            
+            let s = val.toString().trim().replace(/[\$\s%]/g, '');
             if (s.includes(',') && s.includes('.')) {
                 if (s.indexOf('.') < s.indexOf(',')) {
                     s = s.replace(/\./g, '').replace(',', '.');
@@ -549,7 +550,6 @@
             } else if (s.includes(',')) {
                 s = s.replace(',', '.');
             }
-            
             const num = parseFloat(s);
             return isNaN(num) ? 0 : num;
         }
@@ -557,24 +557,15 @@
         function parseExecutionDate(dateStr) {
             if (!dateStr) return null;
             const s = dateStr.toString().trim();
-            
             let match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-            if (match) {
-                return { year: match[1], monthIdx: parseInt(match[2], 10) - 1 };
-            }
-            
+            if (match) return { year: match[1], monthIdx: parseInt(match[2], 10) - 1 };
             match = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\b20\d{2}\b)/);
-            if (match) {
-                return { year: match[3], monthIdx: parseInt(match[2], 10) - 1 };
-            }
-            
+            if (match) return { year: match[3], monthIdx: parseInt(match[2], 10) - 1 };
             const yearMatch = s.match(/\b(20\d{2})\b/);
             if (yearMatch) {
                 let foundMonth = 0;
                 MONTH_NAMES.forEach((mName, idx) => {
-                    if (s.toLowerCase().includes(mName.toLowerCase())) {
-                        foundMonth = idx;
-                    }
+                    if (s.toLowerCase().includes(mName.toLowerCase())) foundMonth = idx;
                 });
                 return { year: yearMatch[1], monthIdx: foundMonth };
             }
@@ -586,34 +577,61 @@
             return Math.round(val).toLocaleString('es-CL');
         }
 
+        // REMAPEO INTEGRAL DE COLUMNAS ORIGINALES DEL EXCEL
         function normalizeDataset(rawList) {
             return rawList.map(row => {
-                const item = { ...row };
+                const item = {};
+                
+                // Conectores exactos entre Excel Real y Variables Internas de la Plantilla
+                item.presupuesto_oficial = parseNumeric(row['Presupuesto oficial']);
+                item.monto_vigente_contr = parseNumeric(row['Monto Vigente Contrato']);
+                item.porcentaje_ejecucion = parseNumeric(row['% ejecución']);
+                item.programado_mas_pagado_ano = parseNumeric(row['Programado + pagado año']);
+                item.pagado_ano = parseNumeric(row['Pagado Año']);
+                item.enero = parseNumeric(row['ENERO']);
+                item.febrero = parseNumeric(row['FEBRERO']);
+                item.marzo = parseNumeric(row['MARZO']);
+                item.abril = parseNumeric(row['ABRIL']);
+                item.mayo = parseNumeric(row['MAYO']);
+                item.junio = parseNumeric(row['JUNIO']);
+                item.julio = parseNumeric(row['JULIO']);
+                item.agosto = parseNumeric(row['AGOSTO']);
+                item.septiembre = parseNumeric(row['SEPTIEMBRE']);
+                item.octubre = parseNumeric(row['OCTUBRE']);
+                item.noviembre = parseNumeric(row['NOVIEMBRE']);
+                item.diciembre = parseNumeric(row['DICIEMBRE']);
+                item.ano_siguiente = parseNumeric(row['Año Siguiente']);
+                item.saldo = parseNumeric(row['Saldo']);
+                item.presupuesto_ejecutado_millones_de_pesos = parseNumeric(row['Presupuesto ejecutado (millones de pesos)']);
+                item.promedio = parseInt(row['Promedio']) || 0;
+                item.fecha_ejecucion = row['fecha ejecución'];
 
-                // Convertir campos a número mapeando los campos normalizados internamente
-                const numericFields = [
-                    'presupuesto_oficial', 'monto_vigente_contr', 'porcentaje_ejecucion',
-                    'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
-                    'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-                    'ano_siguiente', 'saldo', 'presupuesto_ejecutado_millones_de_pesos', 'promedio'
-                ];
-
-                numericFields.forEach(f => {
-                    const val = item[f];
-                    item[f] = (typeof val === 'number') ? val : parseNumeric(val);
-                });
+                item.servicio = row['Dirección/Servicio/subdirección'] || row['Servicio'] || "Sin Información";
+                item.provincia = row['Provincia'] || row['Provincia Contrato'] || "Sin Información";
+                item.comuna = row['Comuna'] || row['Comuna Contrato'] || "Sin Información";
+                item.region = row['REGION'] || row['Reg Proyecto'] || "Sin Información";
+                item.estado = row['Estado'] || "N/A";
+                item.tipo_de_gasto = row['Tipo de gasto'] || "Capital";
+                item.bip = row['Bip'] || "Sin BIP";
+                item.id_chilecompra = row['Id Chilecompra'] || "Sin ID";
+                item.nombre_contrato = row['Nombre Contrato'] || row['Nombre IDI'] || "Sin Nombre";
+                item.nombre_contratista = row['Nombre Contratista'] || "Sin Contratista";
+                item.periodo_presupuestario = row['Periodo presupuestario'] || "Arrastre";
+                item.ajuste_contrato = row['ajuste de contrato'] ? row['ajuste de contrato'].toString().trim() : "Sin Ajuste";
+                item.socio_maule = row['socio maule'] || "No hay datos";
 
                 const parsedDate = parseExecutionDate(item.fecha_ejecucion);
                 if (parsedDate) {
                     item.rowYear = parsedDate.year;
                     item.rowMonthIdx = parsedDate.monthIdx;
-                    item.year = parsedDate.year; 
+                    item.year = parsedDate.year;
                 } else {
-                    item.rowYear = item.year || "S/I";
+                    item.rowYear = "2026";
                     item.rowMonthIdx = 5; 
                     item.year = item.rowYear;
                 }
 
+                // Ajuste de escala de miles a millones de pesos
                 const thousandsCols = [
                     'programado_mas_pagado_ano', 'pagado_ano', 'enero', 'febrero', 'marzo', 'abril',
                     'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
@@ -626,23 +644,8 @@
 
                 item.pagado_año = item.presupuesto_ejecutado_millones_de_pesos; 
 
-                item.servicio = item['direccion/servicio/subdireccion'] || item.servicio || "Sin Información";
-                item.provincia = item.provincia || item['provincia_contrato'] || "Sin Información";
-                item.comuna = item.comuna || item['comuna_contrato'] || "Sin Información";
-                item.region = item.region || "Sin Información";
-                item.estado = item.estado || "N/A";
-                item.tipo_de_gasto = item.tipo_de_gasto || "Capital";
-                item.bip = item.bip || "Sin BIP";
-                item.id_chilecompra = item.id_chilecompra || "Sin ID";
-                item.nombre_contrato = item.nombre_contrato || item.nombre_idi || "Sin Nombre";
-                item.nombre_contratista = item.nombre_contratista || "Sin Contratista";
-                item.periodo_presupuestario = item.periodo_presupuestario || "Arrastre";
-                
-                item.promedio = int(item.promedio) || 0;
-                item.ajuste_contrato = item.ajuste_contrato ? item.ajuste_contrato.toString().trim() : "Sin Ajuste";
-
-                let rawSocio = (item.socio_maule || "").toString().trim().toLowerCase();
-                if (rawSocio.includes("socio empresa") || rawSocio === "si" || rawSocio === "sí" || rawSocio === "socio") {
+                let rawSocio = item.socio_maule.toString().trim().toLowerCase();
+                if (rawSocio.includes("socio empresa") || rawSocio === "si" || rawSocio === "sí") {
                     item.socio_maule = "Socio Empresa";
                 } else if (rawSocio.includes("no socio") || rawSocio === "no") {
                     item.socio_maule = "No socio CChC Maule";
@@ -659,9 +662,7 @@
         function onDataLoaded(autoSelectPeriod = false) {
             const yearsMap = {};
             currentDataset.forEach(row => {
-                if (row.rowYear && row.rowYear !== "S/I" && row.rowYear !== "N/A") {
-                    yearsMap[row.rowYear] = true;
-                }
+                if (row.rowYear && row.rowYear !== "S/I") yearsMap[row.rowYear] = true;
             });
             yearsList = Object.keys(yearsMap).sort((a, b) => b - a);
 
@@ -675,30 +676,11 @@
         }
 
         function selectMostRecentPeriod() {
-            if (currentDataset.length === 0) return;
-            let newestYear = "";
-            let newestMonthIdx = -1;
-
-            for (let y = 0; y < yearsList.length; y++) {
-                const yr = yearsList[y];
-                for (let m = 11; m >= 0; m--) {
-                    const hasRecords = currentDataset.some(row => row.rowYear === yr && row.rowMonthIdx === m);
-                    if (hasRecords) {
-                        newestYear = yr;
-                        newestMonthIdx = m;
-                        break;
-                    }
-                }
-                if (newestMonthIdx !== -1) break;
-            }
-
-            if (newestMonthIdx === -1) {
-                activeYear = yearsList[0] || "2026";
-                activeMonthIdx = 5; 
-            } else {
-                activeYear = newestYear;
-                activeMonthIdx = newestMonthIdx;
-            }
+            activeYear = yearsList[0] || "2026";
+            const currentYearRows = currentDataset.filter(r => r.rowYear === activeYear);
+            let maxM = 0;
+            currentYearRows.forEach(r => { if (r.rowMonthIdx > maxM) maxM = r.rowMonthIdx; });
+            activeMonthIdx = maxM;
         }
 
         function populateSelectors() {
@@ -748,14 +730,14 @@
             buildSelectOptions(selectProvincia, Array.from(provincias).sort(), "Todas", prevProvincia);
             buildSelectOptions(selectComuna, Array.from(comunas).sort(), "Todas", prevComuna);
             buildSelectOptions(selectEstado, Array.from(estados).sort(), "Todos los Estados", prevEstado);
-            buildSelectOptions(selectGasto, Array.from(gastas).sort(), "Todos los Tipos", prevGasto);
+            buildSelectOptions(selectGasto, Array.from(gastos).sort(), "Todos los Tipos", prevGasto);
             buildSelectOptions(selectAjuste, Array.from(ajustes).sort(), "Todos los Ajustes", prevAjuste);
         }
 
         function buildSelectOptions(selectElement, list, defaultLabel, prevValue) {
             selectElement.innerHTML = `<option value="">${defaultLabel}</option>`;
             list.forEach(val => {
-                if (val && val !== "N/A" && val !== "S/I") {
+                if (val && val !== "N/A" && val !== "Sin Información") {
                     const opt = document.createElement('option');
                     opt.value = val; opt.textContent = val;
                     if (val === prevValue) opt.selected = true;
@@ -764,14 +746,11 @@
             });
         }
 
-        function onRegionChange() {
-            applyFilters();
-        }
+        function onRegionChange() { applyFilters(); }
 
         function updateSocioMauleVisibility(regionVal) {
             const socioContainer = document.getElementById('filter-socio-container');
-            const selectedVal = (regionVal || "").toLowerCase();
-            if (selectedVal.includes('maule')) {
+            if ((regionVal || "").toLowerCase().includes('maule')) {
                 socioContainer.classList.remove('opacity-40', 'pointer-events-none');
                 socioContainer.classList.add('bg-amber-100/70');
             } else {
@@ -785,11 +764,9 @@
             filterPeriodoPresupuestario = periodo;
             ['all', 'arrastre', 'nuevo'].forEach(id => {
                 const btn = document.getElementById(`btn-periodo-${id}`);
-                if (id === (periodo || 'all').toLowerCase()) {
-                    btn.className = "py-1 px-1.5 rounded border text-[10px] font-bold bg-blue-600 text-white border-blue-600 transition-all";
-                } else {
-                    btn.className = "py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all";
-                }
+                btn.className = id === (periodo || 'all').toLowerCase() 
+                    ? "py-1 px-1.5 rounded border text-[10px] font-bold bg-blue-600 text-white border-blue-600 transition-all"
+                    : "py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all";
             });
             applyFilters();
         }
@@ -880,35 +857,6 @@
                 updateHistoricalKPIsAndTable(); renderHistoricalCharts();
             }
             renderTable();
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-region').value = ""; document.getElementById('filter-servicio').value = "";
-            document.getElementById('filter-provincia').value = ""; document.getElementById('filter-comuna').value = "";
-            document.getElementById('filter-estado').value = ""; document.getElementById('filter-gasto').value = "";
-            document.getElementById('filter-ajuste').value = ""; document.getElementById('table-search').value = "";
-            document.getElementById('filter-socio').value = ""; filterPeriodoPresupuestario = "";
-            setPeriodoPresupuestario(''); selectMostRecentPeriod(); renderYearSelectors(); renderMonthSelectors(); applyFilters();
-            showToast("Todos los filtros se restablecieron", "fa-solid fa-arrow-rotate-left text-blue-500");
-        }
-
-        function switchTab(tab) {
-            activeTab = tab;
-            const btnDash = document.getElementById('tab-btn-dashboard');
-            const btnHist = document.getElementById('tab-btn-historical');
-            const contentDash = document.getElementById('tab-content-dashboard');
-            const contentHist = document.getElementById('tab-content-historical');
-            if (tab === 'dashboard') {
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentDash.classList.remove('hidden'); contentHist.classList.add('hidden');
-                updatePeriodKPIs(); renderDashboardCharts(); renderCrossTable();
-            } else {
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentHist.classList.remove('hidden'); contentDash.classList.add('hidden');
-                updateHistoricalKPIsAndTable(); renderHistoricalCharts();
-            }
         }
 
         function updatePeriodKPIs() {
@@ -1060,6 +1008,25 @@
             } else {
                 kpiAbs.textContent = `$0 MM`; kpiAbs.className = "text-xl font-bold mt-1 text-slate-700";
                 kpiPct.textContent = "0.0%"; kpiPct.className = "text-xl font-bold mt-1 text-slate-700";
+            }
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const btnDash = document.getElementById('tab-btn-dashboard');
+            const btnHist = document.getElementById('tab-btn-historical');
+            const contentDash = document.getElementById('tab-content-dashboard');
+            const contentHist = document.getElementById('tab-content-historical');
+            if (tab === 'dashboard') {
+                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
+                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
+                contentDash.classList.remove('hidden'); contentHist.classList.add('hidden');
+                updatePeriodKPIs(); renderDashboardCharts(); renderCrossTable();
+            } else {
+                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-blue-600 bg-blue-50 transition-all flex items-center justify-center gap-2";
+                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-6 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
+                contentHist.classList.remove('hidden'); contentDash.classList.add('hidden');
+                updateHistoricalKPIsAndTable(); renderHistoricalCharts();
             }
         }
 
@@ -1216,6 +1183,18 @@
             activePeriodRows.forEach(row => { csvContent += `${row.year};${MONTH_NAMES[activeMonthIdx]};"${row.servicio}";"${row.provincia}";"${row.comuna}";${row.bip};"${row.nombre_contrato}";"${row.nombre_contratista}";${row.monto_vigente_contr};"${row.ajuste_contrato}";${row.pagado_año};${row.estado}\r\n`; });
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `ejecucion_mop_${activeYear}.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function showToast(message, iconClass) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').className = iconClass;
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.add('opacity-0', 'translate-y-20', 'pointer-events-none');
+            }, 3500);
         }
     </script>
 </body>
