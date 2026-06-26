@@ -200,7 +200,7 @@
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     <span>Información del Periodo</span>
                 </div>
-                <p id="period-info-label" class="text-slate-600 font-medium font-semibold font-semibold">Cargando...</p>
+                <p id="period-info-label" class="text-slate-600 font-medium font-semibold">Cargando...</p>
             </div>
         </aside>
 
@@ -704,21 +704,55 @@
             return loadedRows;
         }
 
+        // --- EXTRACTOR DE AÑO Y MES DESDE FECHA DE EJECUCIÓN (MANDATORIO) ---
+        function parseExecutionDate(dateStr) {
+            if (!dateStr) return null;
+            const s = dateStr.toString().trim();
+            
+            // Caso ISO YYYY-MM-DD
+            let match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+            if (match) {
+                return {
+                    year: match[1],
+                    monthIdx: parseInt(match[2], 10) - 1
+                };
+            }
+            
+            // Caso DD/MM/YYYY o DD-MM-YYYY
+            match = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\b20\d{2}\b)/);
+            if (match) {
+                return {
+                    year: match[3],
+                    monthIdx: parseInt(match[2], 10) - 1
+                };
+            }
+            
+            // Búsqueda inteligente de un año de 4 dígitos (2020-2029) y nombres de meses en español
+            const yearMatch = s.match(/\b(20\d{2})\b/);
+            if (yearMatch) {
+                let foundMonth = 0;
+                MONTH_NAMES.forEach((mName, idx) => {
+                    if (s.toLowerCase().includes(mName.toLowerCase())) {
+                        foundMonth = idx;
+                    }
+                });
+                return {
+                    year: yearMatch[1],
+                    monthIdx: foundMonth
+                };
+            }
+            return null;
+        }
+
         // --- PARSER INTEGRADO PARA SOPORTAR FORMATOS JSON (ARRAY U OBJETOS) ---
         function parseRawJson(jsonData, yearFallback) {
-            if (!Array.isArray(jsonData) && jsonData !== null && typeof jsonData === 'object') {
+            if (!Array.isArray(jsonData)) {
                 if (jsonData.rows && Array.isArray(jsonData.rows)) {
                     jsonData = jsonData.rows;
                 } else if (jsonData.values && Array.isArray(jsonData.values)) {
                     jsonData = jsonData.values;
                 } else {
-                    // Buscar dinámicamente cualquier propiedad que sea un Array (por ej. si se convirtió de Excel a JSON)
-                    const arrayKey = Object.keys(jsonData).find(k => Array.isArray(jsonData[k]));
-                    if (arrayKey) {
-                        jsonData = jsonData[arrayKey];
-                    } else {
-                        return [];
-                    }
+                    return [];
                 }
             }
 
@@ -2112,7 +2146,7 @@
                     `"${row.ajuste_contrato || 'Sin Ajuste'}"`,
                     executedYtd,
                     percentValue.toFixed(1),
-                    row.estado
+                    row.rowYear
                 ];
                 csvContent += line.join(";") + "\r\n";
             });
