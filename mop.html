@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejecución Presupuestaria MOP | Dashboard</title>
     
-    <!-- Meta tag for Open Graph (Miniatura) -->
     <meta property="og:title" content="Visualizador Ejecución Presupuestaria MOP">
     <meta property="og:description" content="Módulo de análisis y seguimiento de iniciativas de inversión del MOP.">
     <meta property="og:image" content="https://cchc.cl/documents/431409/0/logoCChC.png/002fea99-2039-beec-02a7-a92335532d6f?t=1695346405910">
@@ -17,7 +16,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Babel para transpilar JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script>
@@ -50,7 +48,6 @@
         }
     </script>
 
-    <!-- IMPORT MAP: Configurado para usar Recharts sin errores -->
     <script type="importmap">
     {
         "imports": {
@@ -261,9 +258,15 @@
             useEffect(() => {
                 const loadData = async () => {
                     try {
-                        const response = await fetch('datos_ejecucion.json');
-                        if (!response.ok) throw new Error('No se pudo cargar el archivo de datos');
-                        let jsonData = await response.json();
+                        // Cambiamos la ruta al archivo súper comprimido .gz
+                        const response = await fetch('datos_ejecucion.json.gz');
+                        if (!response.ok) throw new Error('No se pudo cargar el archivo de datos comprimido');
+                        
+                        // ACCIÓN MÁGICA DEL NAVEGADOR: Descomprime el archivo en la memoria del usuario al instante
+                        const ds = new DecompressionStream('gzip');
+                        const decompressedStream = response.body.pipeThrough(ds);
+                        const jsonText = await new Response(decompressedStream).text();
+                        let jsonData = JSON.parse(jsonText);
                         
                         // Parsear datos si vienen en string
                         jsonData = jsonData.map(item => ({
