@@ -95,7 +95,7 @@
             <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-blue-800 font-medium sm:px-6 lg:px-8">
                 <div class="flex items-center space-x-2 overflow-hidden">
                     <i class="fa-solid fa-circle-info text-blue-600 shrink-0"></i>
-                    <span class="truncate">Los reportes financieros se consolidan estrictamente según la variable de fecha de control registrada.</span>
+                    <span class="truncate">Los reportes financieros se consolidan strictly según la variable de fecha de control registrada.</span>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()" class="text-blue-500 hover:text-blue-700 ml-2">
                     <i class="fa-solid fa-xmark"></i>
@@ -203,11 +203,8 @@
                 </div>
 
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
-                    
-                    
-                    </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
                             <div class="bg-blue-50 p-3 rounded-lg text-[#00306b] shrink-0">
                                 <i class="fa-solid fa-wallet text-xl md:text-2xl"></i>
@@ -260,7 +257,7 @@
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-chart-line text-[#00306b]"></i>
-                                    Curva de Inversión (Prog. Ajustado a la fecha vs. Programado Futuro)
+                                    Curva de Inversión (Prog. Ajustado vs. Programado Futuro)
                                 </h3>
                                 <span id="chart-monthly-title" class="text-xs text-[#00306b] font-semibold bg-blue-50 px-2 py-0.5 rounded-full">YTD</span>
                             </div>
@@ -273,7 +270,7 @@
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-building text-[#00306b]"></i>
-                                    Inversión por Ministerio
+                                    Inversión por Servicio
                                 </h3>
                                 <span class="text-xs text-slate-400">Escala en MM$</span>
                             </div>
@@ -288,7 +285,7 @@
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-pie-chart text-[#00306b]"></i>
-                                    Asignación del Gasto en el Periodo
+                                    Asignación por Subtítulo
                                 </h3>
                             </div>
                             <div class="chart-container">
@@ -300,7 +297,7 @@
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-table-cells text-[#00306b]"></i>
-                                    Matriz: Sector vs. Etapa (MM$ Ejecutados YTD)
+                                    Matriz: Sector vs. Etapa (MM$ Ejecutados)
                                 </h3>
                             </div>
                             <div class="overflow-auto flex-grow max-h-[250px] custom-scrollbar">
@@ -342,11 +339,11 @@
                                     <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
                                         <th class="py-3 px-4">Año</th>
                                         <th class="py-3 px-4">Mes Analizado</th>
-                                        <th class="py-3 px-4 text-right">Presp. Pagado + Prog. Fin de Año (MM$)</th>
-                                        <th class="py-3 px-4 text-right">Prog. Ajustado a la fecha (MM$)</th>
-                                        <th class="py-3 px-4 text-center">Avance del programa (%)</th>
-                                        <th class="py-3 px-4 text-right">Var. Absoluta (MM$)</th>
-                                        <th class="py-3 px-4 text-center">Var. Relativa (%)</th>
+                                        <th class="py-3 px-4 text-right">Solicitado (MM$)</th>
+                                        <th class="py-3 px-4 text-right">Prog. Ajustado (MM$)</th>
+                                        <th class="py-3 px-4 text-center">Avance (%)</th>
+                                        <th class="py-3 px-4 text-right">Var. Absoluta</th>
+                                        <th class="py-3 px-4 text-center">Var. Relativa</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historical-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
@@ -361,7 +358,7 @@
                                     <i class="fa-solid fa-chart-column text-[#00306b]"></i>
                                     Presupuesto vs Inversión YTD por Año
                                 </h3>
-                                <span class="text-xs text-slate-400" id="historical-chart-bar-subtitle">YTD</span>
+                                <span class="text-xs text-slate-400">YTD</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="chart-historical-comparison"></canvas>
@@ -374,7 +371,7 @@
                                     <i class="fa-solid fa-chart-line text-[#00306b]"></i>
                                     Evolución Tasa de Avance Presupuestario (%)
                                 </h3>
-                                <span class="text-xs text-slate-400" id="historical-chart-line-subtitle">YTD</span>
+                                <span class="text-xs text-slate-400">YTD</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="chart-historical-rate"></canvas>
@@ -395,7 +392,7 @@
                         
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="relative">
-                                <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar contratista, BIP, ID..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
+                                <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar proyecto, BIP, servicio..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                             </div>
                             
@@ -410,14 +407,14 @@
                         <table class="w-full text-left border-collapse text-xs min-w-[900px]">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
-                                    <th class="py-3 px-4">BIP / ID MP</th>
-                                    <th class="py-3 px-4">Contrato</th>
-                                    <th class="py-3 px-4">Servicio (Dirección)</th>
+                                    <th class="py-3 px-4">BIP / Código</th>
+                                    <th class="py-3 px-4">Iniciativa</th>
+                                    <th class="py-3 px-4">Servicio</th>
                                     <th class="py-3 px-4">Ubicación</th>
-                                    <th class="py-3 px-4 text-right">Monto Vigente</th>
-                                    <th class="py-3 px-4 text-right">Ajuste</th>
-                                    <th class="py-3 px-4 text-right">Prog. Ajustado a la fecha</th>
-                                    <th class="py-3 px-4 text-center">Ejecución física reportada</th>
+                                    <th class="py-3 px-4 text-right">Monto Solicitado</th>
+                                    <th class="py-3 px-4 text-right">Etapa</th>
+                                    <th class="py-3 px-4 text-right">Prog. Ajustado</th>
+                                    <th class="py-3 px-4 text-center">Avance (%)</th>
                                     <th class="py-3 px-4 text-center">Estado</th>
                                 </tr>
                             </thead>
@@ -445,7 +442,6 @@
         const MONTH_KEYS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-        // --- RUTA AUTOMÁTICA DEL REPOSITORIO DE GITHUB ---
         const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/contacto-dev-ne/presupuesto/main/";
 
         // --- ESTADO GENERAL ---
@@ -455,20 +451,18 @@
         
         let activeYear = ""; 
         let activeMonthIdx = 0; 
-        let filterPeriodoPresupuestario = ""; 
 
         let currentPage = 1;
         const rowsPerPage = 10;
         let activeTab = 'dashboard';
 
-        // Gráficos (Instancias de Chart.js)
+        // Instancias de Chart.js
         let chartMonthlyInstance = null;
         let chartServicesInstance = null;
         let chartTypeExpenseInstance = null;
         let chartHistoricalComparisonInstance = null;
         let chartHistoricalRateInstance = null;
 
-        // Al iniciar carga silenciosa en segundo plano
         window.addEventListener('load', () => {
             autoSyncOnLoad();
         });
@@ -484,7 +478,6 @@
             document.getElementById('landing-view').classList.remove('hidden');
         }
 
-        // --- SISTEMA DESCOMPRESOR EN CALIENTE SEGURO ---
         async function fetchAndDecompressGzip(url) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
@@ -494,7 +487,6 @@
             return JSON.parse(decompressedString);
         }
 
-        // --- ESCANER DE VENTANA INDEPENDIENTE ---
         async function fetchGzipDataset(baseUrl) {
             let loadedRows = [];
             const startYear = 2020;
@@ -503,20 +495,16 @@
             for (let year = startYear; year <= endYear; year++) {
                 const fileName = `datos_propir_${year}.json.gz`;
                 const url = `${baseUrl}${fileName}`;
-                
                 try {
                     const rawJson = await fetchAndDecompressGzip(url);
                     const normalizedRows = parseRawJson(rawJson, year.toString());
                     loadedRows = loadedRows.concat(normalizedRows);
-                    console.log(`Unificado exitosamente: ${fileName}`);
                 } catch (e) {
-                    // Ignora silenciosamente los 404 de años sin archivo
+                    // Ignorar archivos no encontrados
                 }
             }
 
-            if (loadedRows.length === 0) {
-                throw new Error("No se encontraron registros financieros vigentes.");
-            }
+            if (loadedRows.length === 0) throw new Error("No se encontraron registros.");
             return loadedRows;
         }
 
@@ -538,7 +526,6 @@
             return isNaN(num) ? 0 : num;
         }
 
-        // --- PARSER DE FECHA EXCEL SERIAL CORRECTOR ---
         function parseExecutionDate(dateStr) {
             if (!dateStr) return null;
             const s = dateStr.toString().trim();
@@ -574,8 +561,7 @@
                 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
                 'septiembre', 'octubre', 'noviembre', 'diciembre',
                 '% avance fisico', '% avance financiero', 'fecha', 'ano', 'mes', 'mes_num',
-                'sector', 'provincia', 'comuna',
-                'subtitulo presupuestario', 'subtitulo', 'item presupuestario', 'item'
+                'sector', 'provincia', 'comuna', 'subtitulo presupuestario', 'subtitulo', 'item'
             ];
             
             let allProcessedObjects = [];
@@ -649,11 +635,10 @@
                 const data = await fetchGzipDataset(DEFAULT_BASE_URL);
                 currentDataset = data;
                 onDataLoaded(true); 
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
             } catch (err) {
-                console.warn("Fallo general. Iniciando simulación estructural local.", err);
+                console.warn("Iniciando datos de prueba locales.", err);
                 loadDemoData();
+            } finally {
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
             }
@@ -682,6 +667,33 @@
             activeMonthIdx = newestMonthIdx;
         }
 
+        function renderYearSelectors() {
+            const container = document.getElementById('filter-years-container');
+            if (!container) return;
+            container.innerHTML = '';
+            yearsList.forEach(yr => {
+                const btn = document.createElement('button');
+                btn.className = `py-1 px-2 rounded text-xs transition-all ${yr === activeYear ? 'bg-[#00306b] text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.textContent = yr;
+                btn.onclick = () => { activeYear = yr; renderYearSelectors(); applyFilters(); };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderMonthSelectors() {
+            const container = document.getElementById('filter-months-container');
+            if (!container) return;
+            container.innerHTML = '';
+            MONTH_NAMES.forEach((mName, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `py-1 px-1.5 rounded text-[10px] transition-all truncate ${idx === activeMonthIdx ? 'bg-[#00306b] text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.textContent = mName.substring(0, 3);
+                btn.title = mName;
+                btn.onclick = () => { activeMonthIdx = idx; renderMonthSelectors(); applyFilters(); };
+                container.appendChild(btn);
+            });
+        }
+
         function populateSelectors() {
             const selectMinisterio = document.getElementById('filter-ministerio');
             const selectServicio = document.getElementById('filter-servicio');
@@ -690,6 +702,8 @@
             const selectEtapa = document.getElementById('filter-etapa');
             const selectProvincia = document.getElementById('filter-provincia');
             const selectComuna = document.getElementById('filter-comuna');
+
+            if (!selectMinisterio) return;
 
             const prevMinisterio = selectMinisterio.value;
             const prevServicio = selectServicio.value;
@@ -725,6 +739,7 @@
         }
 
         function buildSelectOptions(selectElement, list, defaultLabel, prevValue) {
+            if (!selectElement) return;
             selectElement.innerHTML = `<option value="">${defaultLabel}</option>`;
             list.forEach(val => {
                 if (val && val !== "N/A" && val !== "S/I") {
@@ -736,14 +751,14 @@
         }
 
         function filterData() {
-            const ministerio = document.getElementById('filter-ministerio').value;
-            const servicio = document.getElementById('filter-servicio').value;
-            const subtitulo = document.getElementById('filter-subtitulo').value;
-            const sector = document.getElementById('filter-sector').value;
-            const etapa = document.getElementById('filter-etapa').value;
-            const provincia = document.getElementById('filter-provincia').value;
-            const comuna = document.getElementById('filter-comuna').value;
-            const search = document.getElementById('table-search').value.toLowerCase();
+            const ministerio = document.getElementById('filter-ministerio')?.value || "";
+            const servicio = document.getElementById('filter-servicio')?.value || "";
+            const subtitulo = document.getElementById('filter-subtitulo')?.value || "";
+            const sector = document.getElementById('filter-sector')?.value || "";
+            const etapa = document.getElementById('filter-etapa')?.value || "";
+            const provincia = document.getElementById('filter-provincia')?.value || "";
+            const comuna = document.getElementById('filter-comuna')?.value || "";
+            const search = document.getElementById('table-search')?.value.toLowerCase() || "";
 
             filteredDataset = currentDataset.filter(row => {
                 if (row.rowYear !== activeYear || row.rowMonthIdx !== activeMonthIdx) return false;
@@ -767,19 +782,39 @@
             populateSelectors();
             filterData();
             
-            const activePeriodRows = filteredDataset;
-            document.getElementById('period-info-label').innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${activePeriodRows.length} contratos activos.`;
+            const infoLabel = document.getElementById('period-info-label');
+            if (infoLabel) {
+                infoLabel.innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${filteredDataset.length} contratos activos.`;
+            }
 
             currentPage = 1;
             if (activeTab === 'dashboard') {
                 updatePeriodKPIs(); 
                 updateCharts(); 
+                renderServicesPeriodBarChart();
+                renderTypeExpensePeriodDoughnutChart();
                 renderCrossTable(); 
             } else {
                 updateHistoricalKPIsAndTable(); 
                 renderHistoricalCharts();
             }
             renderTable();
+        }
+
+        function updatePeriodKPIs() {
+            let totalRequested = 0, totalProgrammed = 0, contractsCount = filteredDataset.length;
+            filteredDataset.forEach(r => {
+                totalRequested += (r.solicitado || 0);
+                totalProgrammed += (r.programado || 0);
+            });
+
+            const pct = totalRequested > 0 ? (totalProgrammed / totalRequested) * 100 : 0;
+
+            if (document.getElementById('kpi-budget')) document.getElementById('kpi-budget').textContent = `$${formatMillions(totalRequested)} MM`;
+            if (document.getElementById('kpi-executed')) document.getElementById('kpi-executed').textContent = `$${formatMillions(totalProgrammed)} MM`;
+            if (document.getElementById('kpi-percentage')) document.getElementById('kpi-percentage').textContent = `${pct.toFixed(1)}%`;
+            if (document.getElementById('kpi-percentage-bar')) document.getElementById('kpi-percentage-bar').style.width = `${Math.min(100, pct)}%`;
+            if (document.getElementById('kpi-contracts')) document.getElementById('kpi-contracts').textContent = contractsCount;
         }
 
         function updateCharts() {
@@ -789,7 +824,7 @@
             });
 
             const ejecutadoData = MONTH_KEYS.map((_, i) => i <= activeMonthIdx ? monthlySumAll[i] : null);
-            const programadoData = MONTH_KEYS.map((_, i) => i > activeMonthIdx ? monthlySumAll[i] : null);
+            const programadoData = MONTH_KEYS.map((_, i) => i >= activeMonthIdx ? monthlySumAll[i] : null);
 
             const dataMonthly = {
                 labels: MONTH_NAMES,
@@ -814,30 +849,38 @@
                 ]
             };
             
-            const ctx = document.getElementById('chart-monthly').getContext('2d');
+            const canvas = document.getElementById('chart-monthly');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (chartMonthlyInstance) chartMonthlyInstance.destroy();
             chartMonthlyInstance = new Chart(ctx, {
                 type: 'line',
+                data: dataMonthly,
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
         function renderServicesPeriodBarChart() {
             const grouped = {};
-            const periodData = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
-            periodData.forEach(row => {
-                const s = row.servicio; if (!grouped[s]) grouped[s] = { budget: 0, paid: 0 };
-                grouped[s].budget += (row.programado_mas_pagado_ano || 0); grouped[s].paid += (row.pagado_año || 0);
+            filteredDataset.forEach(row => {
+                const s = row.servicio || "Sin Servicio"; 
+                if (!grouped[s]) grouped[s] = { budget: 0, paid: 0 };
+                grouped[s].budget += (row.solicitado || 0); 
+                grouped[s].paid += (row.programado || 0);
             });
             const labels = Object.keys(grouped);
 
-            const ctx = document.getElementById('chart-services').getContext('2d');
+            const canvas = document.getElementById('chart-services');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (chartServicesInstance) chartServicesInstance.destroy();
             chartServicesInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels.map(l => l.length > 20 ? l.substring(0, 20) + "..." : l),
                     datasets: [
-                        { label: 'Prog + Pagado Año', data: labels.map(l => grouped[l].budget), backgroundColor: '#94a3b8' },
-                        { label: 'Prog. Ajustado a la fecha', data: labels.map(l => grouped[l].paid), backgroundColor: '#00306b' }
+                        { label: 'Solicitado', data: labels.map(l => grouped[l].budget), backgroundColor: '#94a3b8' },
+                        { label: 'Prog. Ajustado', data: labels.map(l => grouped[l].paid), backgroundColor: '#00306b' }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
@@ -846,15 +889,15 @@
 
         function renderTypeExpensePeriodDoughnutChart() {
             const grouped = {};
-            const periodData = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
-            
-            periodData.forEach(row => { 
-                const asig = row.asignacion || "Sin Especificar"; 
-                grouped[asig] = (grouped[asig] || 0) + (row.pagado_año || 0); 
+            filteredDataset.forEach(row => { 
+                const asig = row.subtitulo_texto || "Sin Clasificación"; 
+                grouped[asig] = (grouped[asig] || 0) + (row.programado || 0); 
             });
             const labels = Object.keys(grouped);
 
-            const ctx = document.getElementById('chart-type-expense').getContext('2d');
+            const canvas = document.getElementById('chart-type-expense');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (chartTypeExpenseInstance) chartTypeExpenseInstance.destroy();
             chartTypeExpenseInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -868,64 +911,136 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { boxWidth: 10, font: { size: 10 } }
-                        }
-                    }
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
                 }
             });
         }
 
-        function renderHistoricalCharts() {
-            const labels = [...yearsList].reverse(); const budgetsYTD = [], executedYTD = [], ratesYTD = [];
-            labels.forEach(yr => {
-                let yrBudget = 0, yrExecuted = 0;
-                const yrPeriodData = filteredDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
-                yrPeriodData.forEach(row => { yrBudget += (row.programado_mas_pagado_ano || 0); yrExecuted += (row.pagado_año || 0); });
-                budgetsYTD.push(yrBudget); executedYTD.push(yrExecuted); ratesYTD.push(yrBudget > 0 ? ((yrExecuted / yrBudget) * 100) : 0);
+        function renderCrossTable() {
+            const head = document.getElementById('cross-table-head');
+            const body = document.getElementById('cross-table-body');
+            if (!head || !body) return;
+
+            head.innerHTML = `<tr><th class="py-2 px-3">Sector / Etapa</th><th class="py-2 px-3 text-right">Monto (MM$)</th></tr>`;
+            body.innerHTML = '';
+
+            const grouped = {};
+            filteredDataset.forEach(r => {
+                const sec = r.sector || "General";
+                grouped[sec] = (grouped[sec] || 0) + (r.programado || 0);
             });
 
-            const ctxBar = document.getElementById('chart-historical-comparison').getContext('2d');
-            if (chartHistoricalComparisonInstance) chartHistoricalComparisonInstance.destroy();
-            chartHistoricalComparisonInstance = new Chart(ctxBar, {
-                type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Presupuesto Año', data: budgetsYTD, backgroundColor: '#94a3b8' }, { label: 'Prog. Ajustado a la fecha', data: executedYTD, backgroundColor: '#00306b' }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctxLine = document.getElementById('chart-historical-rate').getContext('2d');
-            if (chartHistoricalRateInstance) chartHistoricalRateInstance.destroy();
-            chartHistoricalRateInstance = new Chart(ctxLine, {
-                type: 'line',
-                data: { labels: labels, datasets: [{ label: '% Avance', data: ratesYTD, borderColor: '#00306b', fill: true, tension: 0.1 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+            Object.entries(grouped).forEach(([sector, total]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="py-2 px-3 font-medium">${sector}</td><td class="py-2 px-3 text-right font-bold">$${formatMillions(total)} MM</td>`;
+                body.appendChild(tr);
             });
         }
 
+        function updateHistoricalKPIsAndTable() {
+            const titleMonth = document.getElementById('historical-table-month-name');
+            if (titleMonth) titleMonth.textContent = MONTH_NAMES[activeMonthIdx];
+
+            const body = document.getElementById('historical-table-body');
+            if (!body) return;
+            body.innerHTML = '';
+
+            let prevYearExecuted = 0;
+            let currYearExecuted = 0;
+
+            yearsList.forEach((yr, idx) => {
+                let yrBudget = 0, yrExecuted = 0;
+                const yrPeriodData = currentDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
+                yrPeriodData.forEach(row => { 
+                    yrBudget += (row.solicitado || 0); 
+                    yrExecuted += (row.programado || 0); 
+                });
+
+                if (yr === activeYear) currYearExecuted = yrExecuted;
+                if (idx === 1) prevYearExecuted = yrExecuted;
+
+                const rate = yrBudget > 0 ? (yrExecuted / yrBudget) * 100 : 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-bold text-slate-800">${yr}</td>
+                    <td class="py-2.5 px-4 text-slate-600">${MONTH_NAMES[activeMonthIdx]}</td>
+                    <td class="py-2.5 px-4 text-right font-medium">$${formatMillions(yrBudget)} MM</td>
+                    <td class="py-2.5 px-4 text-right font-bold text-[#00306b]">$${formatMillions(yrExecuted)} MM</td>
+                    <td class="py-2.5 px-4 text-center font-semibold">${rate.toFixed(1)}%</td>
+                    <td class="py-2.5 px-4 text-right">-</td>
+                    <td class="py-2.5 px-4 text-center">-</td>
+                `;
+                body.appendChild(tr);
+            });
+
+            const diffAbs = currYearExecuted - prevYearExecuted;
+            const diffPct = prevYearExecuted > 0 ? (diffAbs / prevYearExecuted) * 100 : 0;
+
+            if (document.getElementById('historical-kpi-diff-abs')) document.getElementById('historical-kpi-diff-abs').textContent = `$${formatMillions(diffAbs)} MM`;
+            if (document.getElementById('historical-kpi-diff-pct')) document.getElementById('historical-kpi-diff-pct').textContent = `${diffPct.toFixed(1)}%`;
+        }
+
+        function renderHistoricalCharts() {
+            const labels = [...yearsList].reverse(); 
+            const budgetsYTD = [], executedYTD = [], ratesYTD = [];
+            labels.forEach(yr => {
+                let yrBudget = 0, yrExecuted = 0;
+                const yrPeriodData = currentDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
+                yrPeriodData.forEach(row => { yrBudget += (row.solicitado || 0); yrExecuted += (row.programado || 0); });
+                budgetsYTD.push(yrBudget); executedYTD.push(yrExecuted); ratesYTD.push(yrBudget > 0 ? ((yrExecuted / yrBudget) * 100) : 0);
+            });
+
+            const canvasBar = document.getElementById('chart-historical-comparison');
+            if (canvasBar) {
+                const ctxBar = canvasBar.getContext('2d');
+                if (chartHistoricalComparisonInstance) chartHistoricalComparisonInstance.destroy();
+                chartHistoricalComparisonInstance = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: [{ label: 'Solicitado', data: budgetsYTD, backgroundColor: '#94a3b8' }, { label: 'Prog. Ajustado', data: executedYTD, backgroundColor: '#00306b' }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const canvasLine = document.getElementById('chart-historical-rate');
+            if (canvasLine) {
+                const ctxLine = canvasLine.getContext('2d');
+                if (chartHistoricalRateInstance) chartHistoricalRateInstance.destroy();
+                chartHistoricalRateInstance = new Chart(ctxLine, {
+                    type: 'line',
+                    data: { labels: labels, datasets: [{ label: '% Avance', data: ratesYTD, borderColor: '#00306b', fill: true, tension: 0.1 }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
         function renderTable() {
-            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
-            const activePeriodRows = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
-            const startIndex = (currentPage - 1) * rowsPerPage; const endIndex = startIndex + rowsPerPage;
-            const pageData = activePeriodRows.slice(startIndex, endIndex);
+            const tbody = document.getElementById('table-body'); 
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * rowsPerPage; 
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = filteredDataset.slice(startIndex, endIndex);
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">No se encontraron registros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">No se encontraron registros en este filtro.</td></tr>`;
                 return;
             }
 
             pageData.forEach(row => {
-                const executedYtd = row.pagado_año || 0; const totalAdjusted = row.programado_mas_pagado_ano || 0;
-                const percentValue = totalAdjusted > 0 ? ((executedYtd / totalAdjusted) * 100) : 0;
-                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+                const executedYtd = row.programado || 0; 
+                const totalBudget = row.solicitado || 0;
+                const percentValue = totalBudget > 0 ? ((executedYtd / totalBudget) * 100) : 0;
+                
+                const tr = document.createElement('tr'); 
+                tr.className = "hover:bg-slate-50 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-medium text-slate-900">BIP: ${row.bip}<br><span class="text-[10px] text-slate-400">${row.id_chilecompra}</span></td>
-                    <td class="py-3 px-4 max-w-xs font-semibold truncate" title="${row.nombre_contrato}">${row.nombre_contrato}<br><span class="text-[10px] font-normal text-slate-400 truncate block">Contr: ${row.nombre_contratista}</span></td>
+                    <td class="py-3 px-4 font-medium text-slate-900">BIP: ${row.codigo}<br><span class="text-[10px] text-slate-400">${row.subtitulo_num}</span></td>
+                    <td class="py-3 px-4 max-w-xs font-semibold truncate" title="${row.nombre_iniciativa}">${row.nombre_iniciativa}</td>
                     <td class="py-3 px-4 text-slate-500">${row.servicio}</td>
                     <td class="py-3 px-4 text-slate-500">${row.comuna}<br><span class="text-[10px] text-slate-400">${row.provincia}</span></td>
-                    <td class="py-3 px-4 text-right font-medium">$${formatMillions(row.monto_vigente_contr)} MM</td>
-                    <td class="py-3 px-4 text-right text-slate-500">${row.ajuste_contrato}</td>
+                    <td class="py-3 px-4 text-right font-medium">$${formatMillions(totalBudget)} MM</td>
+                    <td class="py-3 px-4 text-right text-slate-500">${row.etapa}</td>
                     <td class="py-3 px-4 text-right font-bold text-emerald-600">$${formatMillions(executedYtd)} MM</td>
                     <td class="py-3 px-4 text-center font-bold">
                         <div class="flex items-center justify-center space-x-1.5">
@@ -935,53 +1050,90 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-100 whitespace-nowrap">${row.estado}</span></td>`;
+                    <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-100 whitespace-nowrap">Vigente</span></td>`;
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('table-info-pagination').textContent = `Mostrando ${startIndex + 1}-${Math.min(endIndex, activePeriodRows.length)} de ${activePeriodRows.length} registros`;
-            document.getElementById('btn-prev-page').disabled = currentPage === 1;
-            document.getElementById('btn-next-page').disabled = endIndex >= activePeriodRows.length;
+            if (document.getElementById('table-info-pagination')) {
+                document.getElementById('table-info-pagination').textContent = `Mostrando ${startIndex + 1}-${Math.min(endIndex, filteredDataset.length)} de ${filteredDataset.length} registros`;
+            }
+            if (document.getElementById('btn-prev-page')) document.getElementById('btn-prev-page').disabled = currentPage === 1;
+            if (document.getElementById('btn-next-page')) document.getElementById('btn-next-page').disabled = endIndex >= filteredDataset.length;
         }
 
-        function changePage(direction) { currentPage += direction; renderTable(); }
+        function changePage(direction) { 
+            currentPage += direction; 
+            renderTable(); 
+        }
 
         function switchTab(tab) {
             activeTab = tab;
-            const btnDash = document.getElementById('tab-btn-dashboard'); const btnHist = document.getElementById('tab-btn-historical');
-            const contentDash = document.getElementById('tab-content-dashboard'); const contentHist = document.getElementById('tab-content-historical');
+            const btnDash = document.getElementById('tab-btn-dashboard'); 
+            const btnHist = document.getElementById('tab-btn-historical');
+            const contentDash = document.getElementById('tab-content-dashboard'); 
+            const contentHist = document.getElementById('tab-content-historical');
+            
             if (tab === 'dashboard') {
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-[#00306b] bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentDash.classList.remove('hidden'); contentHist.classList.add('hidden');
+                if (btnDash) btnDash.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-[#00306b] bg-blue-50 transition-all flex items-center justify-center gap-2";
+                if (btnHist) btnHist.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
+                if (contentDash) contentDash.classList.remove('hidden'); 
+                if (contentHist) contentHist.classList.add('hidden');
             } else {
-                btnHist.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-[#00306b] bg-blue-50 transition-all flex items-center justify-center gap-2";
-                btnDash.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
-                contentHist.classList.remove('hidden'); contentDash.classList.add('hidden');
+                if (btnHist) btnHist.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-[#00306b] bg-blue-50 transition-all flex items-center justify-center gap-2";
+                if (btnDash) btnDash.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-lg font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-2";
+                if (contentHist) contentHist.classList.remove('hidden'); 
+                if (contentDash) contentDash.classList.add('hidden');
             }
             applyFilters();
         }
 
         function resetFilters() {
-            document.getElementById('filter-region').value = ""; document.getElementById('filter-servicio').value = "";
-            document.getElementById('filter-provincia').value = ""; document.getElementById('filter-comuna').value = "";
-            document.getElementById('filter-estado').value = ""; document.getElementById('filter-gasto').value = "";
-            document.getElementById('filter-ajuste').value = ""; document.getElementById('table-search').value = "";
-            setPeriodoPresupuestario(''); selectMostRecentPeriod(); renderYearSelectors(); renderMonthSelectors(); applyFilters();
+            ['filter-ministerio', 'filter-servicio', 'filter-subtitulo', 'filter-sector', 'filter-etapa', 'filter-provincia', 'filter-comuna', 'table-search'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            selectMostRecentPeriod(); 
+            renderYearSelectors(); 
+            renderMonthSelectors(); 
+            applyFilters();
+        }
+
+        function exportToCSV() {
+            if (!filteredDataset.length) return;
+            let csvContent = "data:text/csv;charset=utf-8,BIP,Iniciativa,Servicio,Provincia,Comuna,Solicitado,Programado\n";
+            filteredDataset.forEach(r => {
+                csvContent += `"${r.codigo}","${r.nombre_iniciativa}","${r.servicio}","${r.provincia}","${r.comuna}",${r.solicitado},${r.programado}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `PROPIR_${activeYear}_${activeMonthIdx + 1}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function formatMillions(val) { return (val || 0).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
-
-        function showToast(message, iconClass) {
-            console.log(`[Notificación]: ${message}`);
-        }
 
         function loadDemoData() {
             const temp = [];
             for (let y = 2024; y <= 2026; y++) {
                 for (let m = 0; m <= 5; m++) {
                     temp.push({
-                        year: y.toString(), servicio: "Dirección de Arquitectura", region: "Arica y Parinacota", provincia: "ARICA", comuna: "ARICA", bip: "40053823-0", nombre_contrato: "CONSERVACION COMPLEJO FRONTERIZO CHACALLUTA", monto_vigente_contr: 16188, ajuste_contrato: "Sin Reajuste", programado_mas_pagado_ano: 5406304, pagado_ano: 5406304, presupuesto_ejecutado_millones_de_pesos: 5406, tipo_de_gasto: "Contratación de Obras", asignacion: "OBRAS CIVILES", estado: "En Ejecución", periodo_presupuestario: "Nuevo", promedio: 1, fecha_ejecucion: "46023"
+                        rowYear: y.toString(),
+                        rowMonthIdx: m,
+                        ano: y,
+                        mes_num: m + 1,
+                        ministerio: "Ministerio de Obras Públicas",
+                        'servicio responsable': "Dirección de Arquitectura", 
+                        provincia: "TALCA", 
+                        comuna: "TALCA", 
+                        codigo: "40053823-0", 
+                        'nombre de la iniciativa': "CONSERVACION COMPLEJO FRONTERIZO", 
+                        solicitado: 15000, 
+                        'programado ajustado a la fecha': 12000, 
+                        sector: "Edificación Pública", 
+                        etapa: "Ejecución"
                     });
                 }
             }
