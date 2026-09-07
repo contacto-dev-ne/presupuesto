@@ -858,11 +858,11 @@
 
         function updateCharts() {
             const monthlySumAll = new Array(12).fill(0);
-            let totalProgramadoAjustado = 0;
+            let totalSolicitado = 0;
 
             filteredDataset.forEach(row => {
                 MONTH_KEYS.forEach((m, i) => { monthlySumAll[i] += row[m] || 0; });
-                totalProgramadoAjustado += (row.programado || 0);
+                totalSolicitado += (row.solicitado || 0);
             });
 
             // ACUMULADO MES A MES
@@ -883,11 +883,11 @@
             // Programado grafica desde el mes activo en adelante
             let programadoData = cumulativeSum.map((val, i) => i >= activeMonthIdx ? val : null);
 
-            // CORRECCIÓN: Si estamos en el último año, conectamos directo a Diciembre con "Programado Ajustado"
+            // CORRECCIÓN: Si estamos en el último año, conectamos directo a Diciembre con "Solicitado"
             if (isLatestYear && activeMonthIdx < 11) {
                 programadoData = new Array(12).fill(null);
                 programadoData[activeMonthIdx] = cumulativeSum[activeMonthIdx];
-                programadoData[11] = totalProgramadoAjustado;
+                programadoData[11] = totalSolicitado;
             }
 
             const dataMonthly = {
