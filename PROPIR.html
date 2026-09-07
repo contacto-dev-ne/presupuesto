@@ -824,8 +824,18 @@
                 MONTH_KEYS.forEach((m, i) => { monthlySumAll[i] += row[m] || 0; });
             });
 
-            const ejecutadoData = MONTH_KEYS.map((_, i) => i <= activeMonthIdx ? monthlySumAll[i] : null);
-            const programadoData = MONTH_KEYS.map((_, i) => i >= activeMonthIdx ? monthlySumAll[i] : null);
+            // ACUMULADO MES A MES
+            const cumulativeSum = new Array(12).fill(0);
+            let currentTotal = 0;
+            for (let i = 0; i < 12; i++) {
+                currentTotal += monthlySumAll[i];
+                cumulativeSum[i] = currentTotal;
+            }
+
+            // Ejecutado grafica hasta el mes activo
+            const ejecutadoData = cumulativeSum.map((val, i) => i <= activeMonthIdx ? val : null);
+            // Programado grafica desde el mes activo en adelante
+            const programadoData = cumulativeSum.map((val, i) => i >= activeMonthIdx ? val : null);
 
             const dataMonthly = {
                 labels: MONTH_NAMES,
