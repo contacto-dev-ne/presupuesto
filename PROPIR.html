@@ -600,7 +600,7 @@
                     item.year = item.rowYear;
                 }
 
-                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS (De Pesos a Millones)
+                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS
                 const thousandsCols = [
                     'solicitado', 'programado ajustado a la fecha', 'pagado acumulado al periodo',
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
@@ -658,7 +658,14 @@
             if (currentDataset.length === 0) return;
             let newestYear = yearsList[0];
             let newestMonthIdx = 0;
+            
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             for (let m = 11; m >= 0; m--) {
+                // Prevenir auto-seleccionar un mes futuro en el año en curso
+                if (newestYear === currentYearStr && m >= currentMonthIdx) continue;
+                
                 if (currentDataset.some(row => row.rowYear === newestYear && row.rowMonthIdx === m)) {
                     newestMonthIdx = m;
                     break;
@@ -672,11 +679,27 @@
             const container = document.getElementById('filter-years-container');
             if (!container) return;
             container.innerHTML = '';
+            
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             yearsList.forEach(yr => {
                 const btn = document.createElement('button');
                 btn.className = `py-1 px-2 rounded text-xs transition-all ${yr === activeYear ? 'bg-[#00306b] text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.textContent = yr;
-                btn.onclick = () => { activeYear = yr; renderYearSelectors(); applyFilters(); };
+                btn.onclick = () => { 
+                    activeYear = yr; 
+                    
+                    // Si saltamos al año actual y estamos en un mes bloqueado, retrocedemos al mes habilitado más cercano
+                    if (activeYear === currentYearStr && activeMonthIdx >= currentMonthIdx) {
+                        activeMonthIdx = currentMonthIdx - 1;
+                        if (activeMonthIdx < 0) activeMonthIdx = 0;
+                    }
+                    
+                    renderYearSelectors(); 
+                    renderMonthSelectors(); 
+                    applyFilters(); 
+                };
                 container.appendChild(btn);
             });
         }
@@ -685,12 +708,27 @@
             const container = document.getElementById('filter-months-container');
             if (!container) return;
             container.innerHTML = '';
+            
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             MONTH_NAMES.forEach((mName, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `py-1 px-1.5 rounded text-[10px] transition-all truncate ${idx === activeMonthIdx ? 'bg-[#00306b] text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                
+                // Si estamos en el año actual, bloqueamos el mes en curso y los futuros
+                let isBlocked = (activeYear === currentYearStr && idx >= currentMonthIdx);
+
+                if (isBlocked) {
+                    btn.className = `py-1 px-1.5 rounded text-[10px] truncate bg-slate-50 text-slate-300 cursor-not-allowed border border-slate-100 opacity-60`;
+                    btn.disabled = true;
+                    btn.title = `Mes no disponible en el año en curso (${mName})`;
+                } else {
+                    btn.className = `py-1 px-1.5 rounded text-[10px] transition-all truncate ${idx === activeMonthIdx ? 'bg-[#00306b] text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                    btn.title = mName;
+                    btn.onclick = () => { activeMonthIdx = idx; renderMonthSelectors(); applyFilters(); };
+                }
+                
                 btn.textContent = mName.substring(0, 3);
-                btn.title = mName;
-                btn.onclick = () => { activeMonthIdx = idx; renderMonthSelectors(); applyFilters(); };
                 container.appendChild(btn);
             });
         }
@@ -820,8 +858,11 @@
 
         function updateCharts() {
             const monthlySumAll = new Array(12).fill(0);
+            let totalProgramadoAjustado = 0;
+
             filteredDataset.forEach(row => {
                 MONTH_KEYS.forEach((m, i) => { monthlySumAll[i] += row[m] || 0; });
+                totalProgramadoAjustado += (row.programado || 0);
             });
 
             // ACUMULADO MES A MES
@@ -832,10 +873,22 @@
                 cumulativeSum[i] = currentTotal;
             }
 
+            // Detección automática del último año en la data
+            const maxYear = Math.max(...yearsList.map(Number)).toString();
+            const isLatestYear = (activeYear === maxYear);
+
             // Ejecutado grafica hasta el mes activo
             const ejecutadoData = cumulativeSum.map((val, i) => i <= activeMonthIdx ? val : null);
+            
             // Programado grafica desde el mes activo en adelante
-            const programadoData = cumulativeSum.map((val, i) => i >= activeMonthIdx ? val : null);
+            let programadoData = cumulativeSum.map((val, i) => i >= activeMonthIdx ? val : null);
+
+            // CORRECCIÓN: Si estamos en el último año, conectamos directo a Diciembre con "Programado Ajustado"
+            if (isLatestYear && activeMonthIdx < 11) {
+                programadoData = new Array(12).fill(null);
+                programadoData[activeMonthIdx] = cumulativeSum[activeMonthIdx];
+                programadoData[11] = totalProgramadoAjustado;
+            }
 
             const dataMonthly = {
                 labels: MONTH_NAMES,
@@ -855,7 +908,7 @@
                         backgroundColor: 'rgba(59, 130, 246, 0.08)',
                         borderWidth: 2, pointBackgroundColor: '#3b82f6',
                         borderDash: [5, 5], fill: true, tension: 0.4,
-                        spanGaps: false
+                        spanGaps: true // Permite que la línea se dibuje saltando los meses vacíos hasta diciembre
                     }
                 ]
             };
