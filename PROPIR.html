@@ -600,12 +600,13 @@
                     item.year = item.rowYear;
                 }
 
+                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS (De Pesos a Millones)
                 const thousandsCols = [
                     'solicitado', 'programado ajustado a la fecha', 'pagado acumulado al periodo',
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
                     'septiembre', 'octubre', 'noviembre', 'diciembre'
                 ];
-                thousandsCols.forEach(col => { item[col] = item[col] / 1000; });
+                thousandsCols.forEach(col => { item[col] = (item[col] || 0) / 1000000; });
                 
                 item.ministerio = item.ministerio || "Sin Información";
                 item.servicio = item['servicio responsable'] || "Sin Información";
@@ -1130,8 +1131,8 @@
                         comuna: "TALCA", 
                         codigo: "40053823-0", 
                         'nombre de la iniciativa': "CONSERVACION COMPLEJO FRONTERIZO", 
-                        solicitado: 15000, 
-                        'programado ajustado a la fecha': 12000, 
+                        solicitado: 15000000, 
+                        'programado ajustado a la fecha': 12000000, 
                         sector: "Edificación Pública", 
                         etapa: "Ejecución"
                     });
