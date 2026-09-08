@@ -266,7 +266,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-building text-[#00306b]"></i>
@@ -274,8 +274,12 @@
                                 </h3>
                                 <span class="text-xs text-slate-400">Escala en MM$</span>
                             </div>
-                            <div class="chart-container">
-                                <canvas id="chart-services"></canvas>
+                            <!-- Se aplicó overflow-y-auto aquí para permitir el scroll interno vertical -->
+                            <div class="chart-container overflow-y-auto custom-scrollbar pr-2" style="height: 280px;">
+                                <!-- El wrapper interno crecerá dependiendo de la cantidad de barras -->
+                                <div id="chart-services-wrapper" style="position: relative; height: 100%; width: 100%;">
+                                    <canvas id="chart-services"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -663,7 +667,6 @@
             const currentMonthIdx = new Date().getMonth();
 
             for (let m = 11; m >= 0; m--) {
-                // Prevenir auto-seleccionar un mes futuro en el año en curso
                 if (newestYear === currentYearStr && m >= currentMonthIdx) continue;
                 
                 if (currentDataset.some(row => row.rowYear === newestYear && row.rowMonthIdx === m)) {
@@ -690,7 +693,6 @@
                 btn.onclick = () => { 
                     activeYear = yr; 
                     
-                    // Si saltamos al año actual y estamos en un mes bloqueado, retrocedemos al mes habilitado más cercano
                     if (activeYear === currentYearStr && activeMonthIdx >= currentMonthIdx) {
                         activeMonthIdx = currentMonthIdx - 1;
                         if (activeMonthIdx < 0) activeMonthIdx = 0;
@@ -715,7 +717,6 @@
             MONTH_NAMES.forEach((mName, idx) => {
                 const btn = document.createElement('button');
                 
-                // Si estamos en el año actual, bloqueamos el mes en curso y los futuros
                 let isBlocked = (activeYear === currentYearStr && idx >= currentMonthIdx);
 
                 if (isBlocked) {
@@ -865,7 +866,6 @@
                 totalSolicitado += (row.solicitado || 0);
             });
 
-            // ACUMULADO MES A MES
             const cumulativeSum = new Array(12).fill(0);
             let currentTotal = 0;
             for (let i = 0; i < 12; i++) {
@@ -873,17 +873,12 @@
                 cumulativeSum[i] = currentTotal;
             }
 
-            // Detección automática del último año en la data
             const maxYear = Math.max(...yearsList.map(Number)).toString();
             const isLatestYear = (activeYear === maxYear);
 
-            // Ejecutado grafica hasta el mes activo
             const ejecutadoData = cumulativeSum.map((val, i) => i <= activeMonthIdx ? val : null);
-            
-            // Programado grafica desde el mes activo en adelante
             let programadoData = cumulativeSum.map((val, i) => i >= activeMonthIdx ? val : null);
 
-            // CORRECCIÓN: Si estamos en el último año, conectamos directo a Diciembre con "Solicitado"
             if (isLatestYear && activeMonthIdx < 11) {
                 programadoData = new Array(12).fill(null);
                 programadoData[activeMonthIdx] = cumulativeSum[activeMonthIdx];
@@ -908,7 +903,7 @@
                         backgroundColor: 'rgba(59, 130, 246, 0.08)',
                         borderWidth: 2, pointBackgroundColor: '#3b82f6',
                         borderDash: [5, 5], fill: true, tension: 0.4,
-                        spanGaps: true // Permite que la línea se dibuje saltando los meses vacíos hasta diciembre
+                        spanGaps: true
                     }
                 ]
             };
@@ -932,22 +927,57 @@
                 grouped[s].budget += (row.solicitado || 0); 
                 grouped[s].paid += (row.programado || 0);
             });
-            const labels = Object.keys(grouped);
+            
+            // Ordenar de mayor a menor por programado ajustado para una mejor lectura
+            const labels = Object.keys(grouped).sort((a, b) => grouped[b].paid - grouped[a].paid);
+
+            const wrapper = document.getElementById('chart-services-wrapper');
+            if (wrapper) {
+                // Le damos a cada barra horizontal un espacio cómodo (aprox 45px por servicio).
+                // Si hay pocos servicios, mantendrá el mínimo de 280px de alto.
+                const requiredHeight = Math.max(280, labels.length * 45); 
+                wrapper.style.height = requiredHeight + 'px';
+            }
 
             const canvas = document.getElementById('chart-services');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             if (chartServicesInstance) chartServicesInstance.destroy();
+            
             chartServicesInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels.map(l => l.length > 20 ? l.substring(0, 20) + "..." : l),
+                    labels: labels, // Mostramos el nombre completo del servicio
                     datasets: [
                         { label: 'Solicitado', data: labels.map(l => grouped[l].budget), backgroundColor: '#94a3b8' },
                         { label: 'Prog. Ajustado', data: labels.map(l => grouped[l].paid), backgroundColor: '#00306b' }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    indexAxis: 'y', // ESTO VUELVE EL GRÁFICO HORIZONTAL
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false // Permite que el hover active el tooltip al tocar la fila, sin necesitar apuntar exacto a la barra
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += '$' + formatMillions(context.parsed.x) + ' MM';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
 
