@@ -294,10 +294,7 @@
                         </div>
                     </div>
 
-                    <!-- NUEVA DISPOSICIÓN: Matriz arriba y Gráfico Circular Abajo -->
                     <div class="flex flex-col gap-6">
-                        
-                        <!-- MATRIZ (Ahora arriba y ancho completo) -->
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -305,7 +302,6 @@
                                     Matriz: Sector vs. Etapa (MM$ Ejecutados)
                                 </h3>
                             </div>
-                            <!-- Aumentamos el max-h a 350px para ver más contenido de la matriz -->
                             <div class="overflow-auto flex-grow max-h-[350px] custom-scrollbar relative">
                                 <table class="w-full text-left border-collapse text-xs min-w-[500px]">
                                     <thead id="cross-table-head" class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10"></thead>
@@ -314,7 +310,6 @@
                             </div>
                         </div>
 
-                        <!-- GRÁFICO CIRCULAR (Ahora abajo) -->
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -487,10 +482,18 @@
             autoSyncOnLoad();
         });
 
+        // ==========================================
+        // NUEVA LÓGICA DE TOGGLE PARA FILTROS DINÁMICOS
+        // ==========================================
         function applyFilterFromChart(filterId, value) {
             const el = document.getElementById(filterId);
             if (el) {
-                el.value = value;
+                // Si el filtro ya estaba seleccionado, lo deseleccionamos (comportamiento interruptor)
+                if (el.value === value) {
+                    el.value = "";
+                } else {
+                    el.value = value;
+                }
                 applyFilters();
             }
         }
@@ -641,7 +644,6 @@
                     item.year = item.rowYear;
                 }
 
-                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS
                 const thousandsCols = [
                     'solicitado', 'programado ajustado a la fecha', 'pagado acumulado al periodo',
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
