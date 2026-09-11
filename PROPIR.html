@@ -903,9 +903,6 @@
             }
         }
 
-        // ==========================================
-        // FUNCIÓN FILTRO MAESTRO PARA HISTÓRICO Y DASHBOARD
-        // ==========================================
         function getFilteredDataForHistorical(yr, mIdx) {
             const search = document.getElementById('table-search')?.value.toLowerCase() || "";
 
@@ -1265,7 +1262,7 @@
         }
 
         // ==========================================
-        // CÁLCULO HISTÓRICO ACTUALIZADO (RESPETA FILTROS MULTIPLES)
+        // CÁLCULO HISTÓRICO ACTUALIZADO (Con variaciones)
         // ==========================================
         function updateHistoricalKPIsAndTable() {
             const titleMonth = document.getElementById('historical-table-month-name');
@@ -1275,12 +1272,9 @@
             if (!body) return;
             body.innerHTML = '';
 
-            let prevYearExecuted = 0;
-            let currYearExecuted = 0;
-
-            yearsList.forEach((yr, idx) => {
+            // Pre-calcular la información por año para poder comparar con el "año anterior"
+            const yearlyData = yearsList.map(yr => {
                 let yrBudget = 0, yrExecuted = 0;
-                // Usamos la nueva función que respeta los filtros
                 const yrPeriodData = getFilteredDataForHistorical(yr, activeMonthIdx);
                 
                 yrPeriodData.forEach(row => { 
@@ -1288,28 +1282,56 @@
                     yrExecuted += (row.programado || 0); 
                 });
 
-                if (yr === activeYear) currYearExecuted = yrExecuted;
-                if (idx === 1) prevYearExecuted = yrExecuted;
-
                 const rate = yrBudget > 0 ? (yrExecuted / yrBudget) * 100 : 0;
+                return { year: yr, budget: yrBudget, executed: yrExecuted, rate: rate };
+            });
+
+            yearlyData.forEach((data, idx) => {
+                let varAbsHTML = '-';
+                let varRelHTML = '-';
+
+                // Si hay un año anterior en la lista (que está en idx + 1 por orden descendente)
+                if (idx < yearlyData.length - 1) {
+                    const prevData = yearlyData[idx + 1];
+                    const varAbs = data.executed - prevData.executed;
+                    const varRel = data.rate - prevData.rate; // Puntos porcentuales
+
+                    const colorAbs = varAbs >= 0 ? 'text-emerald-600' : 'text-red-500';
+                    const signAbs = varAbs > 0 ? '+' : '';
+                    varAbsHTML = `<span class="${colorAbs} font-semibold">${signAbs}$${formatMillions(varAbs)} MM</span>`;
+
+                    const colorRel = varRel >= 0 ? 'text-emerald-600' : 'text-red-500';
+                    const signRel = varRel > 0 ? '+' : '';
+                    varRelHTML = `<span class="${colorRel} font-semibold">${signRel}${varRel.toFixed(1)} pp</span>`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="py-2.5 px-4 font-bold text-slate-800">${yr}</td>
+                    <td class="py-2.5 px-4 font-bold text-slate-800">${data.year}</td>
                     <td class="py-2.5 px-4 text-slate-600">${MONTH_NAMES[activeMonthIdx]}</td>
-                    <td class="py-2.5 px-4 text-right font-medium">$${formatMillions(yrBudget)} MM</td>
-                    <td class="py-2.5 px-4 text-right font-bold text-[#00306b]">$${formatMillions(yrExecuted)} MM</td>
-                    <td class="py-2.5 px-4 text-center font-semibold">${rate.toFixed(1)}%</td>
-                    <td class="py-2.5 px-4 text-right">-</td>
-                    <td class="py-2.5 px-4 text-center">-</td>
+                    <td class="py-2.5 px-4 text-right font-medium">$${formatMillions(data.budget)} MM</td>
+                    <td class="py-2.5 px-4 text-right font-bold text-[#00306b]">$${formatMillions(data.executed)} MM</td>
+                    <td class="py-2.5 px-4 text-center font-semibold">${data.rate.toFixed(1)}%</td>
+                    <td class="py-2.5 px-4 text-right">${varAbsHTML}</td>
+                    <td class="py-2.5 px-4 text-center">${varRelHTML}</td>
                 `;
                 body.appendChild(tr);
             });
 
-            const diffAbs = currYearExecuted - prevYearExecuted;
-            const diffPct = prevYearExecuted > 0 ? (diffAbs / prevYearExecuted) * 100 : 0;
+            // Actualizar KPIs superiores de la pestaña Histórica (Compara Año Activo vs Año Anterior)
+            let activeIdx = yearlyData.findIndex(d => d.year === activeYear);
+            let diffAbsKPI = 0;
+            let diffPctKPI = 0;
 
-            if (document.getElementById('historical-kpi-diff-abs')) document.getElementById('historical-kpi-diff-abs').textContent = `$${formatMillions(diffAbs)} MM`;
-            if (document.getElementById('historical-kpi-diff-pct')) document.getElementById('historical-kpi-diff-pct').textContent = `${diffPct.toFixed(1)}%`;
+            if (activeIdx !== -1 && activeIdx < yearlyData.length - 1) {
+                const currentD = yearlyData[activeIdx];
+                const previousD = yearlyData[activeIdx + 1];
+                diffAbsKPI = currentD.executed - previousD.executed;
+                diffPctKPI = previousD.executed > 0 ? (diffAbsKPI / previousD.executed) * 100 : 0;
+            }
+
+            if (document.getElementById('historical-kpi-diff-abs')) document.getElementById('historical-kpi-diff-abs').textContent = `$${formatMillions(diffAbsKPI)} MM`;
+            if (document.getElementById('historical-kpi-diff-pct')) document.getElementById('historical-kpi-diff-pct').textContent = `${diffPctKPI.toFixed(1)}%`;
         }
 
         function renderHistoricalCharts() {
@@ -1318,7 +1340,6 @@
             
             labels.forEach(yr => {
                 let yrBudget = 0, yrExecuted = 0;
-                // Usamos la nueva función que respeta los filtros
                 const yrPeriodData = getFilteredDataForHistorical(yr, activeMonthIdx);
                 
                 yrPeriodData.forEach(row => { yrBudget += (row.solicitado || 0); yrExecuted += (row.programado || 0); });
