@@ -78,7 +78,7 @@
                     
                     <div class="truncate pl-1">
                         <h1 class="text-sm md:text-base font-bold tracking-tight truncate">Portal de Ejecución Presupuestaria</h1>
-                        <p class="text-[10px] text-slate-300 truncate">Control Financiero & Monitoreo de Contratos</p>
+                        <p class="text-[10px] text-slate-300 truncate">Control Financiero & Monitoreo de Proyectos</p>
                     </div>
                 </div>
                 
@@ -197,7 +197,7 @@
                 <div class="bg-slate-50 rounded-lg p-3 border border-slate-100 text-[11px] text-slate-500 space-y-1.5">
                     <div class="font-semibold text-slate-600 flex items-center gap-1">
                         <i class="fa-solid fa-file-contract text-[#00306b]"></i>
-                        <span>Contratos vigentes</span>
+                        <span>Proyectos vigentes</span>
                     </div>
                     <p id="period-info-label" class="text-slate-600 font-semibold">Cargando...</p>
                 </div>
@@ -257,7 +257,7 @@
                                         <i class="fa-solid fa-percent text-2xl md:text-3xl"></i>
                                     </div>
                                     <div class="flex-1 w-full">
-                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">% Contratos con Avance</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">% Proyectos con Avance</p>
                                         <h3 id="kpi-percentage" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0%</h3>
                                         <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
                                             <div id="kpi-percentage-bar" class="bg-[#00306b] h-1.5 rounded-full" style="width: 0%"></div>
@@ -270,7 +270,7 @@
                                         <i class="fa-solid fa-file-contract text-2xl md:text-3xl"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Contratos Evaluados</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Proyectos Evaluados</p>
                                         <h3 id="kpi-contracts" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0</h3>
                                         <p id="kpi-contracts-sub" class="text-[11px] text-slate-400 mt-0.5">Reportados en el periodo</p>
                                     </div>
@@ -309,7 +309,10 @@
                         </div>
                     </div>
 
+                    <!-- NUEVA DISPOSICIÓN: Matriz arriba y Gráfico Circular Abajo -->
                     <div class="flex flex-col gap-6">
+                        
+                        <!-- MATRIZ (Ahora arriba y ancho completo) -->
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -325,6 +328,7 @@
                             </div>
                         </div>
 
+                        <!-- GRÁFICO CIRCULAR (Ahora abajo) -->
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -416,9 +420,9 @@
                             <div>
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-table-list text-[#00306b]"></i>
-                                    Listado Detallado de Ejecución de Contratos
+                                    Listado Detallado de Ejecución de Proyectos
                                 </h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Mostrando proyectos vigentes para el periodo seleccionado</p>
                             </div>
                             
                             <div class="flex flex-wrap items-center gap-2">
@@ -939,7 +943,7 @@
             
             const infoLabel = document.getElementById('period-info-label');
             if (infoLabel) {
-                infoLabel.innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${filteredDataset.length} contratos activos.`;
+                infoLabel.innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${filteredDataset.length} proyectos activos.`;
             }
 
             currentPage = 1;
@@ -1379,9 +1383,9 @@
                             label: '% Avance', 
                             data: ratesYTD, 
                             borderColor: '#00306b', 
-                            backgroundColor: 'rgba(0, 48, 107, 0.1)', // Fondo semi-transparente
+                            backgroundColor: 'rgba(0, 48, 107, 0.1)', 
                             fill: true, 
-                            tension: 0.3, // Suaviza la línea
+                            tension: 0.3, 
                             pointBackgroundColor: '#00306b',
                             pointRadius: 4,
                             pointHoverRadius: 6
@@ -1394,7 +1398,7 @@
                             y: {
                                 ticks: {
                                     callback: function(value) {
-                                        return value + '%'; // Agrega % al eje Y
+                                        return value + '%'; 
                                     }
                                 }
                             }
@@ -1403,7 +1407,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return ' Tasa de Avance: ' + context.parsed.y.toFixed(1) + '%'; // Un decimal y %
+                                        return ' Tasa de Avance: ' + context.parsed.y.toFixed(1) + '%'; 
                                     }
                                 }
                             }
