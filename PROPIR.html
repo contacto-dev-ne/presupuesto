@@ -204,50 +204,68 @@
 
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-blue-50 p-3 rounded-lg text-[#00306b] shrink-0">
-                                <i class="fa-solid fa-wallet text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Solicitado (Presup. Inicial)</p>
-                                <h3 id="kpi-budget" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">$0 MM</h3>
-                                <p id="kpi-budget-sub" class="text-[10px] text-slate-400 truncate">Monto Inicial</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-emerald-50 p-3 rounded-lg text-emerald-600 shrink-0">
-                                <i class="fa-solid fa-handholding-dollar text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Prog. Ajustado a la fecha</p>
-                                <h3 id="kpi-executed" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">$0 MM</h3>
-                                <p id="kpi-executed-sub" class="text-[10px] text-slate-400 truncate">Presupuesto Vigente</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-blue-50/80 p-3 rounded-lg text-blue-600 shrink-0">
-                                <i class="fa-solid fa-percent text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden w-full">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">% Contratos con Avance</p>
-                                <h3 id="kpi-percentage" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">0%</h3>
-                                <div class="w-full bg-slate-100 rounded-full h-1 mt-1">
-                                    <div id="kpi-percentage-bar" class="bg-[#00306b] h-1 rounded-full" style="width: 0%"></div>
+                    <!-- SECCIÓN KPIs DESPLEGABLE -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
+                        <button onclick="toggleKPIs()" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-bold text-sm border-b border-slate-100">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-[#00306b]"></i>
+                                Resumen de Indicadores Clave (KPIs)
+                            </span>
+                            <i id="kpi-toggle-icon" class="fa-solid fa-chevron-up transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div id="kpi-collapsible-section" class="p-4 transition-all duration-300">
+                            <!-- Cambio a grid-cols-1 y md:grid-cols-2 para que se agrupen de a 1 o 2 máximo -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Tarjeta 1 -->
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg text-[#00306b] shrink-0">
+                                        <i class="fa-solid fa-wallet text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Solicitado (Presup. Inicial)</p>
+                                        <h3 id="kpi-budget" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">$0 MM</h3>
+                                        <p id="kpi-budget-sub" class="text-[11px] text-slate-400 mt-0.5">Monto Inicial</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-slate-50 p-3 rounded-lg text-slate-500 shrink-0">
-                                <i class="fa-solid fa-file-contract text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Contratos Evaluados</p>
-                                <h3 id="kpi-contracts" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">0</h3>
-                                <p id="kpi-contracts-sub" class="text-[10px] text-slate-400 truncate">Reportados en el periodo</p>
+                                <!-- Tarjeta 2 -->
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-emerald-50 p-4 rounded-lg text-emerald-600 shrink-0">
+                                        <i class="fa-solid fa-handholding-dollar text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Prog. Ajustado a la fecha</p>
+                                        <h3 id="kpi-executed" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">$0 MM</h3>
+                                        <p id="kpi-executed-sub" class="text-[11px] text-slate-400 mt-0.5">Presupuesto Vigente</p>
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta 3 -->
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-blue-50/80 p-4 rounded-lg text-blue-600 shrink-0">
+                                        <i class="fa-solid fa-percent text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">% Contratos con Avance</p>
+                                        <h3 id="kpi-percentage" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0%</h3>
+                                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                                            <div id="kpi-percentage-bar" class="bg-[#00306b] h-1.5 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta 4 -->
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-slate-50 p-4 rounded-lg text-slate-500 shrink-0">
+                                        <i class="fa-solid fa-file-contract text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Contratos Evaluados</p>
+                                        <h3 id="kpi-contracts" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0</h3>
+                                        <p id="kpi-contracts-sub" class="text-[11px] text-slate-400 mt-0.5">Reportados en el periodo</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -274,7 +292,6 @@
                                 </h3>
                                 <span class="text-xs text-slate-400">Escala en MM$</span>
                             </div>
-                            <!-- Ajuste en el contenedor scrollable: Se asegura el tamaño correcto sin romper coordenadas -->
                             <div class="overflow-y-auto custom-scrollbar pr-2" style="height: 280px; position: relative;">
                                 <div id="chart-services-wrapper" style="position: relative; width: 100%;">
                                     <canvas id="chart-services"></canvas>
@@ -469,6 +486,20 @@
         window.addEventListener('load', () => {
             autoSyncOnLoad();
         });
+
+        // NUEVA FUNCIÓN: Colapsar o abrir los KPIs
+        function toggleKPIs() {
+            const section = document.getElementById('kpi-collapsible-section');
+            const icon = document.getElementById('kpi-toggle-icon');
+            
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.classList.remove('rotate-180');
+            } else {
+                section.classList.add('hidden');
+                icon.classList.add('rotate-180');
+            }
+        }
 
         function enterDashboard() {
             document.getElementById('landing-view').classList.add('hidden');
@@ -955,7 +986,7 @@
                     maintainAspectRatio: false,
                     interaction: {
                         mode: 'index',
-                        axis: 'y', // ESTA LÍNEA ES CLAVE: Fuerza al mouse a calcular coordenadas relativas al eje Y en gráficos horizontales
+                        axis: 'y', 
                         intersect: false 
                     },
                     plugins: {
