@@ -216,6 +216,7 @@
                     </button>
                 </div>
 
+                <!-- PESTAÑA: ANÁLISIS DEL PERIODO (Estadística Pura) -->
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
@@ -339,6 +340,7 @@
                     </div>
                 </div>
 
+                <!-- PESTAÑA: COMPARATIVA HISTÓRICA (Gráficos + Tabla Detallada) -->
                 <div id="tab-content-historical" class="space-y-6 hidden overflow-y-auto pr-1 flex-grow custom-scrollbar">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
@@ -407,55 +409,56 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
-                    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-table-list text-[#00306b]"></i>
-                                Listado Detallado de Ejecución de Contratos
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
-                        </div>
-                        
-                        <div class="flex flex-wrap items-center gap-2">
-                            <div class="relative">
-                                <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar proyecto, BIP, servicio..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <!-- TABLA DETALLADA MOVIDA AQUÍ ADENTRO -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0 mt-6">
+                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-table-list text-[#00306b]"></i>
+                                    Listado Detallado de Ejecución de Contratos
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
                             </div>
                             
-                            <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                                <span>Exportar CSV</span>
-                            </button>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="relative">
+                                    <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar proyecto, BIP, servicio..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                </div>
+                                
+                                <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                                    <span>Exportar CSV</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse text-xs min-w-[900px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
-                                    <th class="py-3 px-4">BIP / Código</th>
-                                    <th class="py-3 px-4">Iniciativa</th>
-                                    <th class="py-3 px-4">Servicio</th>
-                                    <th class="py-3 px-4">Ubicación</th>
-                                    <th class="py-3 px-4 text-right">Monto Solicitado</th>
-                                    <th class="py-3 px-4 text-right">Etapa</th>
-                                    <th class="py-3 px-4 text-right">Prog. Ajustado</th>
-                                    <th class="py-3 px-4 text-center">Avance (%)</th>
-                                    <th class="py-3 px-4 text-center">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                        </table>
-                    </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs min-w-[900px]">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
+                                        <th class="py-3 px-4">BIP / Código</th>
+                                        <th class="py-3 px-4">Iniciativa</th>
+                                        <th class="py-3 px-4">Servicio</th>
+                                        <th class="py-3 px-4">Ubicación</th>
+                                        <th class="py-3 px-4 text-right">Monto Solicitado</th>
+                                        <th class="py-3 px-4 text-right">Etapa</th>
+                                        <th class="py-3 px-4 text-right">Prog. Ajustado</th>
+                                        <th class="py-3 px-4 text-center">Avance (%)</th>
+                                        <th class="py-3 px-4 text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
 
-                    <div class="bg-slate-50 border-t border-slate-100 px-5 py-3.5 flex items-center justify-between text-xs text-slate-500">
-                        <div id="table-info-pagination">Mostrando 0-0 de 0 registros</div>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="changePage(-1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-prev-page">Anterior</button>
-                            <button onclick="changePage(1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-next-page">Siguiente</button>
+                        <div class="bg-slate-50 border-t border-slate-100 px-5 py-3.5 flex items-center justify-between text-xs text-slate-500">
+                            <div id="table-info-pagination">Mostrando 0-0 de 0 registros</div>
+                            <div class="flex items-center space-x-1.5">
+                                <button onclick="changePage(-1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-prev-page">Anterior</button>
+                                <button onclick="changePage(1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-next-page">Siguiente</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -693,6 +696,7 @@
                     item.year = item.rowYear;
                 }
 
+                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS
                 const thousandsCols = [
                     'solicitado', 'programado ajustado a la fecha', 'pagado acumulado al periodo',
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
@@ -1261,9 +1265,6 @@
             body.appendChild(totalsRow);
         }
 
-        // ==========================================
-        // CÁLCULO HISTÓRICO ACTUALIZADO (Con variaciones)
-        // ==========================================
         function updateHistoricalKPIsAndTable() {
             const titleMonth = document.getElementById('historical-table-month-name');
             if (titleMonth) titleMonth.textContent = MONTH_NAMES[activeMonthIdx];
@@ -1272,7 +1273,6 @@
             if (!body) return;
             body.innerHTML = '';
 
-            // Pre-calcular la información por año para poder comparar con el "año anterior"
             const yearlyData = yearsList.map(yr => {
                 let yrBudget = 0, yrExecuted = 0;
                 const yrPeriodData = getFilteredDataForHistorical(yr, activeMonthIdx);
@@ -1290,11 +1290,10 @@
                 let varAbsHTML = '-';
                 let varRelHTML = '-';
 
-                // Si hay un año anterior en la lista (que está en idx + 1 por orden descendente)
                 if (idx < yearlyData.length - 1) {
                     const prevData = yearlyData[idx + 1];
                     const varAbs = data.executed - prevData.executed;
-                    const varRel = data.rate - prevData.rate; // Puntos porcentuales
+                    const varRel = data.rate - prevData.rate;
 
                     const colorAbs = varAbs >= 0 ? 'text-emerald-600' : 'text-red-500';
                     const signAbs = varAbs > 0 ? '+' : '';
@@ -1318,7 +1317,6 @@
                 body.appendChild(tr);
             });
 
-            // Actualizar KPIs superiores de la pestaña Histórica (Compara Año Activo vs Año Anterior)
             let activeIdx = yearlyData.findIndex(d => d.year === activeYear);
             let diffAbsKPI = 0;
             let diffPctKPI = 0;
@@ -1353,7 +1351,19 @@
                 chartHistoricalComparisonInstance = new Chart(ctxBar, {
                     type: 'bar',
                     data: { labels: labels, datasets: [{ label: 'Solicitado', data: budgetsYTD, backgroundColor: '#94a3b8' }, { label: 'Prog. Ajustado', data: executedYTD, backgroundColor: '#00306b' }] },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': $' + formatMillions(context.parsed.y) + ' MM';
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             }
 
@@ -1363,8 +1373,42 @@
                 if (chartHistoricalRateInstance) chartHistoricalRateInstance.destroy();
                 chartHistoricalRateInstance = new Chart(ctxLine, {
                     type: 'line',
-                    data: { labels: labels, datasets: [{ label: '% Avance', data: ratesYTD, borderColor: '#00306b', fill: true, tension: 0.1 }] },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    data: { 
+                        labels: labels, 
+                        datasets: [{ 
+                            label: '% Avance', 
+                            data: ratesYTD, 
+                            borderColor: '#00306b', 
+                            backgroundColor: 'rgba(0, 48, 107, 0.1)', // Fondo semi-transparente
+                            fill: true, 
+                            tension: 0.3, // Suaviza la línea
+                            pointBackgroundColor: '#00306b',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%'; // Agrega % al eje Y
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' Tasa de Avance: ' + context.parsed.y.toFixed(1) + '%'; // Un decimal y %
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             }
         }
