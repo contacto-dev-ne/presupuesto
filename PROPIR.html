@@ -481,6 +481,14 @@
             autoSyncOnLoad();
         });
 
+        function applyFilterFromChart(filterId, value) {
+            const el = document.getElementById(filterId);
+            if (el) {
+                el.value = value;
+                applyFilters();
+            }
+        }
+
         function toggleKPIs() {
             const section = document.getElementById('kpi-collapsible-section');
             const icon = document.getElementById('kpi-toggle-icon');
@@ -627,6 +635,7 @@
                     item.year = item.rowYear;
                 }
 
+                // DIVISIÓN POR 1.000.000 APLICADA A TODAS LAS COLUMNAS DE MONTOS
                 const thousandsCols = [
                     'solicitado', 'programado ajustado a la fecha', 'pagado acumulado al periodo',
                     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 
@@ -937,7 +946,21 @@
             chartMonthlyInstance = new Chart(ctx, {
                 type: 'line',
                 data: dataMonthly,
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            activeMonthIdx = index;
+                            renderMonthSelectors();
+                            applyFilters();
+                        }
+                    }
+                }
             });
         }
 
@@ -981,9 +1004,33 @@
                         axis: 'y', 
                         intersect: false 
                     },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const dataIndex = activeElements[0].index;
+                            const selectedServicio = chartServicesInstance.data.labels[dataIndex];
+                            applyFilterFromChart('filter-servicio', selectedServicio);
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Evita que se recorten los labels usando Chart.js callback
+                                callback: function(value) {
+                                    const labelStr = this.getLabelForValue(value) || '';
+                                    return labelStr.length > 20 ? labelStr.substring(0, 20) + '...' : labelStr;
+                                }
+                            }
+                        }
+                    },
                     plugins: {
                         tooltip: {
                             callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label; // Muestra label completo en título
+                                },
                                 label: function(context) {
                                     let label = context.dataset.label || '';
                                     if (label) {
@@ -1025,7 +1072,30 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const index = activeElements[0].index;
+                            const selectedSubtitulo = chartTypeExpenseInstance.data.labels[index];
+                            applyFilterFromChart('filter-subtitulo', selectedSubtitulo);
+                        }
+                    },
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let val = context.parsed;
+                                    let total = context.chart._metasets[context.datasetIndex].total;
+                                    let pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return `${label}: $${formatMillions(val)} MM (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -1035,7 +1105,6 @@
             const body = document.getElementById('cross-table-body');
             if (!head || !body) return;
 
-            // Extraer las etapas únicas y crear la estructura de la matriz
             const etapasSet = new Set();
             const matrixData = {}; 
 
@@ -1054,18 +1123,20 @@
             });
 
             const etapas = Array.from(etapasSet).sort();
-            // Ordenar sectores por monto total de mayor a menor
             const sectors = Object.keys(matrixData).sort((a, b) => matrixData[b].total - matrixData[a].total); 
 
-            // CONSTRUIR EL ENCABEZADO (TH)
+            let grandTotal = 0;
+            sectors.forEach(sec => grandTotal += matrixData[sec].total);
+
+            // CONSTRUIR EL ENCABEZADO
             let headHTML = `<tr><th class="py-3 px-4 sticky left-0 bg-slate-50 z-20 border-r border-slate-200">Sector</th>`;
             etapas.forEach(etp => {
-                headHTML += `<th class="py-3 px-4 text-right min-w-[120px]">${etp}</th>`;
+                headHTML += `<th onclick="applyFilterFromChart('filter-etapa', '${etp}')" class="py-3 px-4 text-right min-w-[120px] cursor-pointer hover:bg-blue-100 hover:text-blue-800 transition-colors" title="Filtrar por Etapa: ${etp}">${etp}</th>`;
             });
             headHTML += `<th class="py-3 px-4 text-right font-bold text-[#00306b] min-w-[120px]">Total Sector</th></tr>`;
             head.innerHTML = headHTML;
 
-            // CONSTRUIR EL CUERPO (TBODY)
+            // CONSTRUIR EL CUERPO
             body.innerHTML = '';
             if (sectors.length === 0) {
                 body.innerHTML = `<tr><td colspan="${etapas.length + 2}" class="text-center py-6 text-slate-400">No hay datos para cruzar.</td></tr>`;
@@ -1076,16 +1147,19 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors";
                 
-                // La columna de los sectores se queda pegada a la izquierda (sticky)
-                let rowHTML = `<td class="py-3 px-4 font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100 z-10 whitespace-nowrap">${sec}</td>`;
+                let pctRowTotal = grandTotal > 0 ? ((matrixData[sec].total / grandTotal) * 100).toFixed(1) : 0;
+
+                let rowHTML = `<td onclick="applyFilterFromChart('filter-sector', '${sec}')" class="py-3 px-4 font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-100 z-10 whitespace-nowrap cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors" title="Filtrar por Sector: ${sec}">${sec}</td>`;
                 
                 etapas.forEach(etp => {
                     const val = matrixData[sec][etp] || 0;
-                    rowHTML += `<td class="py-3 px-4 text-right text-slate-600">${val > 0 ? '$' + formatMillions(val) : '-'}</td>`;
+                    let pctCell = grandTotal > 0 ? ((val / grandTotal) * 100).toFixed(1) : 0;
+                    let pctHTML = val > 0 ? `<span class="text-[9px] text-slate-400 block mt-0.5">(${pctCell}%)</span>` : '';
+                    rowHTML += `<td class="py-3 px-4 text-right text-slate-600">${val > 0 ? '$' + formatMillions(val) + pctHTML : '-'}</td>`;
                 });
                 
                 // Total por Sector (Fila)
-                rowHTML += `<td class="py-3 px-4 text-right font-bold text-[#00306b] bg-slate-50/50">$${formatMillions(matrixData[sec].total)}</td>`;
+                rowHTML += `<td class="py-3 px-4 text-right font-bold text-[#00306b] bg-slate-50/50">$${formatMillions(matrixData[sec].total)}<span class="text-[9px] text-blue-500 block mt-0.5">(${pctRowTotal}%)</span></td>`;
                 
                 tr.innerHTML = rowHTML;
                 body.appendChild(tr);
@@ -1096,14 +1170,14 @@
             totalsRow.className = "bg-slate-100 font-bold text-[#00306b] border-t-2 border-slate-200";
             let totalsHTML = `<td class="py-3 px-4 sticky left-0 bg-slate-100 border-r border-slate-200 z-10 whitespace-nowrap">TOTAL GENERAL</td>`;
             
-            let grandTotal = 0;
             etapas.forEach(etp => {
                 let colTotal = 0;
                 sectors.forEach(sec => { colTotal += (matrixData[sec][etp] || 0); });
-                totalsHTML += `<td class="py-3 px-4 text-right">$${formatMillions(colTotal)}</td>`;
-                grandTotal += colTotal;
+                let pctCol = grandTotal > 0 ? ((colTotal / grandTotal) * 100).toFixed(1) : 0;
+                let pctColHTML = colTotal > 0 ? `<span class="text-[9px] text-blue-500 block mt-0.5">(${pctCol}%)</span>` : '';
+                totalsHTML += `<td class="py-3 px-4 text-right">$${formatMillions(colTotal)}${pctColHTML}</td>`;
             });
-            totalsHTML += `<td class="py-3 px-4 text-right text-emerald-700">$${formatMillions(grandTotal)}</td>`;
+            totalsHTML += `<td class="py-3 px-4 text-right text-emerald-700">$${formatMillions(grandTotal)}<span class="text-[9px] text-emerald-600 block mt-0.5">(100%)</span></td>`;
             totalsRow.innerHTML = totalsHTML;
             body.appendChild(totalsRow);
         }
