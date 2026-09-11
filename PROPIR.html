@@ -274,10 +274,9 @@
                                 </h3>
                                 <span class="text-xs text-slate-400">Escala en MM$</span>
                             </div>
-                            <!-- Se aplicó overflow-y-auto aquí para permitir el scroll interno vertical -->
-                            <div class="chart-container overflow-y-auto custom-scrollbar pr-2" style="height: 280px;">
-                                <!-- El wrapper interno crecerá dependiendo de la cantidad de barras -->
-                                <div id="chart-services-wrapper" style="position: relative; height: 100%; width: 100%;">
+                            <!-- Ajuste en el contenedor scrollable: Se asegura el tamaño correcto sin romper coordenadas -->
+                            <div class="overflow-y-auto custom-scrollbar pr-2" style="height: 280px; position: relative;">
+                                <div id="chart-services-wrapper" style="position: relative; width: 100%;">
                                     <canvas id="chart-services"></canvas>
                                 </div>
                             </div>
@@ -928,13 +927,10 @@
                 grouped[s].paid += (row.programado || 0);
             });
             
-            // Ordenar de mayor a menor por programado ajustado para una mejor lectura
             const labels = Object.keys(grouped).sort((a, b) => grouped[b].paid - grouped[a].paid);
 
             const wrapper = document.getElementById('chart-services-wrapper');
             if (wrapper) {
-                // Le damos a cada barra horizontal un espacio cómodo (aprox 45px por servicio).
-                // Si hay pocos servicios, mantendrá el mínimo de 280px de alto.
                 const requiredHeight = Math.max(280, labels.length * 45); 
                 wrapper.style.height = requiredHeight + 'px';
             }
@@ -947,19 +943,20 @@
             chartServicesInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels, // Mostramos el nombre completo del servicio
+                    labels: labels,
                     datasets: [
                         { label: 'Solicitado', data: labels.map(l => grouped[l].budget), backgroundColor: '#94a3b8' },
                         { label: 'Prog. Ajustado', data: labels.map(l => grouped[l].paid), backgroundColor: '#00306b' }
                     ]
                 },
                 options: { 
-                    indexAxis: 'y', // ESTO VUELVE EL GRÁFICO HORIZONTAL
+                    indexAxis: 'y', 
                     responsive: true, 
                     maintainAspectRatio: false,
                     interaction: {
                         mode: 'index',
-                        intersect: false // Permite que el hover active el tooltip al tocar la fila, sin necesitar apuntar exacto a la barra
+                        axis: 'y', // ESTA LÍNEA ES CLAVE: Fuerza al mouse a calcular coordenadas relativas al eje Y en gráficos horizontales
+                        intersect: false 
                     },
                     plugins: {
                         tooltip: {
