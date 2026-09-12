@@ -244,7 +244,7 @@
                     </button>
                 </div>
 
-                <!-- PESTAÑA: ANÁLISIS DEL PERIODO (Estadística Pura) -->
+                <!-- PESTAÑA: ANÁLISIS DEL PERIODO -->
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
                     
                     <div id="maule-cchc-panel" class="hidden bg-gradient-to-r from-blue-50/60 to-slate-100/60 border border-blue-100 rounded-2xl p-5 shadow-sm space-y-4 shrink-0">
@@ -372,9 +372,7 @@
                         </div>
                     </div>
 
-                    <!-- MATRIZ Y DONUT -->
                     <div class="flex flex-col gap-6">
-                        
                         <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -405,7 +403,7 @@
                     </div>
                 </div>
 
-                <!-- PESTAÑA: COMPARATIVA HISTÓRICA (KPIs, Gráficos + Tabla Detallada) -->
+                <!-- PESTAÑA: COMPARATIVA HISTÓRICA -->
                 <div id="tab-content-historical" class="space-y-6 hidden overflow-y-auto pr-1 flex-grow custom-scrollbar">
                     
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
@@ -593,13 +591,7 @@
             autoSyncOnLoad();
         });
 
-        // Cerrar dropdowns de filtros si se clickea afuera
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.filter-wrapper')) {
-                document.querySelectorAll('[id^="dropdown-"]').forEach(d => d.classList.add('hidden'));
-            }
-        });
-
+        // Toggle para ocultar barra de filtros en móviles
         function toggleSidebarFilters() {
             const content = document.getElementById('sidebar-content');
             const icon = document.getElementById('sidebar-toggle-icon');
@@ -611,6 +603,13 @@
                 icon.classList.remove('rotate-180');
             }
         }
+
+        // Cerrar dropdowns de filtros si se clickea afuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filter-wrapper')) {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(d => d.classList.add('hidden'));
+            }
+        });
 
         function toggleMultiSelect(id, event) {
             event.stopPropagation();
@@ -697,7 +696,7 @@
             const endYear = 2035;
 
             for (let year = startYear; year <= endYear; year++) {
-                const fileName = `datos_${year}.json.gz`;
+                const fileName = `datos_${year}.json.gz`; // Ruta corregida según instrucciones
                 const url = `${baseUrl}${fileName}`;
                 
                 try {
@@ -896,6 +895,7 @@
             periodData.forEach(row => {
                 if (row.region) regiones.add(row.region);
 
+                // Solo alimentar los demás filtros si coinciden con la Región seleccionada (si hay una)
                 if (!prevRegion || row.region === prevRegion) {
                     if (row.ministerio) ministerios.add(row.ministerio);
                     if (activeFilters.ministerio.length === 0 || activeFilters.ministerio.includes(row.ministerio)) {
@@ -915,6 +915,7 @@
                 }
             });
 
+            // Región sigue siendo simple para gatillar lógica de socio
             buildSelectOptions(selectRegion, Array.from(regiones).sort(), "Todas las Regiones", prevRegion);
 
             buildMultiSelectOptions('ministerio', Array.from(ministerios).sort(), "Todos los Ministerios");
@@ -1160,10 +1161,17 @@
                     if (fReg && row.region !== fReg) return false;
                     if (fServ && row.servicio !== fServ) return false;
                     if (filterPeriodoPresupuestario && row.periodo_presupuestario !== filterPeriodoPresupuestario) return false;
-                    if (fProv && row.provincia !== fProv) return false;
-                    if (fCom && row.comuna !== fCom) return false;
-                    if (fEst && row.estado !== fEst) return false;
-                    if (fGast && row.tipo_de_gasto !== fGast) return false;
+                    
+                    if (activeFilters.ministerio.length > 0 && !activeFilters.ministerio.includes(row.ministerio)) return false;
+                    if (activeFilters.servicio.length > 0 && !activeFilters.servicio.includes(row.servicio)) return false;
+                    if (activeFilters.subtitulo.length > 0 && !activeFilters.subtitulo.includes(row.subtitulo_texto)) return false;
+                    if (activeFilters.sector.length > 0 && !activeFilters.sector.includes(row.sector)) return false;
+                    if (activeFilters.etapa.length > 0 && !activeFilters.etapa.includes(row.etapa)) return false;
+                    if (activeFilters.provincia.length > 0 && !activeFilters.provincia.includes(row.provincia)) return false;
+                    if (activeFilters.comuna.length > 0 && !activeFilters.comuna.includes(row.comuna)) return false;
+                    if (activeFilters.estado.length > 0 && !activeFilters.estado.includes(row.estado)) return false;
+                    if (activeFilters.gasto.length > 0 && !activeFilters.gasto.includes(row.tipo_de_gasto)) return false;
+                    if (activeFilters.ajuste.length > 0 && !activeFilters.ajuste.includes(row.ajuste_contrato)) return false;
 
                     return true;
                 });
@@ -1238,11 +1246,13 @@
         function updateHistoricalKPIsAndTable() {
             const tbody = document.getElementById('historical-table-body'); tbody.innerHTML = '';
             document.getElementById('historical-table-month-name').textContent = MONTH_NAMES[activeMonthIdx];
+            document.getElementById('historical-kpi-month-name').textContent = MONTH_NAMES[activeMonthIdx];
+
             const historicalData = []; const chronologicalYears = [...yearsList].reverse();
 
             chronologicalYears.forEach(yr => {
                 let yrBudget = 0, yrExecuted = 0;
-                const yrPeriodData = filteredDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
+                const yrPeriodData = getFilteredDataForHistorical(yr, activeMonthIdx);
                 yrPeriodData.forEach(row => { yrBudget += (row.programado_mas_pagado_ano || 0); yrExecuted += (row.pagado_año || 0); });
                 historicalData.push({ year: yr, budget: yrBudget, executed: yrExecuted, rate: yrBudget > 0 ? ((yrExecuted / yrBudget) * 100) : 0 });
             });
@@ -1252,14 +1262,15 @@
                 let diffAbs = 0, diffPct = 0, diffAbsHTML = `<span class="text-slate-400">—</span>`, diffPctHTML = `<span class="text-slate-400">—</span>`;
                 if (index > 0 && lastYearData) {
                     diffAbs = data.executed - lastYearData.executed;
-                    diffPct = data.rate - lastYearData.rate;
-                    if (diffAbs > 0) {
-                        diffAbsHTML = `<span class="text-green-600 font-semibold">+${formatMillions(diffAbs)} MM</span>`;
-                        diffPctHTML = `<span class="text-green-600 font-semibold"><i class="fa-solid fa-caret-up mr-0.5"></i>+${diffPct.toFixed(1)} pp</span>`;
-                    } else if (diffAbs < 0) {
-                        diffAbsHTML = `<span class="text-red-600 font-semibold">${formatMillions(diffAbs)} MM</span>`;
-                        diffPctHTML = `<span class="text-red-600 font-semibold"><i class="fa-solid fa-caret-down mr-0.5"></i>${diffPct.toFixed(1)} pp</span>`;
-                    }
+                    diffPct = data.rate - lastYearData.rate; // Correccion Var Puntos Porcentuales
+                    
+                    const colorAbs = diffAbs >= 0 ? 'text-emerald-600' : 'text-red-500';
+                    const signAbs = diffAbs > 0 ? '+' : '';
+                    diffAbsHTML = `<span class="${colorAbs} font-semibold">${signAbs}$${formatMillions(diffAbs)} MM</span>`;
+
+                    const colorRel = diffPct >= 0 ? 'text-emerald-600' : 'text-red-500';
+                    const signRel = diffPct > 0 ? '+' : '';
+                    diffPctHTML = `<span class="${colorRel} font-semibold">${signRel}${diffPct.toFixed(1)} pp</span>`;
                 }
                 if (data.year === activeYear) { currentYearDiffAbs = diffAbs; currentYearDiffPct = diffPct; }
                 const isCurrentActive = (data.year === activeYear);
@@ -1281,14 +1292,14 @@
             const kpiAbs = document.getElementById('historical-kpi-diff-abs'); const kpiPct = document.getElementById('historical-kpi-diff-pct');
 
             if (currentYearDiffAbs > 0) {
-                kpiAbs.textContent = `+$${formatMillions(currentYearDiffAbs)} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-green-600";
-                kpiPct.textContent = `+${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-green-600";
+                kpiAbs.textContent = `+$${formatMillions(currentYearDiffAbs)} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-emerald-600";
+                kpiPct.textContent = `+${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-emerald-600";
             } else if (currentYearDiffAbs < 0) {
-                kpiAbs.textContent = `-$${formatMillions(Math.abs(currentYearDiffAbs))} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-red-600";
-                kpiPct.textContent = `${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-red-600";
+                kpiAbs.textContent = `-$${formatMillions(Math.abs(currentYearDiffAbs))} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-red-500";
+                kpiPct.textContent = `${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-red-500";
             } else {
-                kpiAbs.textContent = `$0,0 MM`; kpiPct.textContent = `0.0 pp`;
-                kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800"; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800";
+                kpiAbs.textContent = `$0,0 MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800";
+                kpiPct.textContent = `0.0 pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800";
             }
         }
 
@@ -1347,7 +1358,7 @@
             const grouped = {};
             const periodData = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
             periodData.forEach(row => {
-                const s = row.servicio; if (!grouped[s]) grouped[s] = { budget: 0, paid: 0 };
+                const s = row.servicio || "Sin Servicio"; if (!grouped[s]) grouped[s] = { budget: 0, paid: 0 };
                 grouped[s].budget += (row.programado_mas_pagado_ano || 0); grouped[s].paid += (row.pagado_año || 0);
             });
             const labels = Object.keys(grouped).sort((a, b) => grouped[b].paid - grouped[a].paid);
@@ -1380,7 +1391,6 @@
                     onClick: (e, activeElements) => {
                         if (activeElements.length > 0) {
                             const dataIndex = activeElements[0].index;
-                            // Encontrar nombre original por indice ordenado
                             const originalLabel = labels[dataIndex];
                             applyFilterFromChart('servicio', originalLabel);
                         }
@@ -1436,11 +1446,16 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            // Asignación no tiene filtro en este layout, solo visual.
+                        }
+                    },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { boxWidth: 10, font: { size: 10 } }
-                        },
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1461,7 +1476,7 @@
             const labels = [...yearsList].reverse(); const budgetsYTD = [], executedYTD = [], ratesYTD = [];
             labels.forEach(yr => {
                 let yrBudget = 0, yrExecuted = 0;
-                const yrPeriodData = filteredDataset.filter(row => row.rowYear === yr && row.rowMonthIdx === activeMonthIdx);
+                const yrPeriodData = getFilteredDataForHistorical(yr, activeMonthIdx);
                 yrPeriodData.forEach(row => { yrBudget += (row.programado_mas_pagado_ano || 0); yrExecuted += (row.pagado_año || 0); });
                 budgetsYTD.push(yrBudget); executedYTD.push(yrExecuted); ratesYTD.push(yrBudget > 0 ? ((yrExecuted / yrBudget) * 100) : 0);
             });
@@ -1490,20 +1505,17 @@
             if (chartHistoricalRateInstance) chartHistoricalRateInstance.destroy();
             chartHistoricalRateInstance = new Chart(ctxLine, {
                 type: 'line',
-                data: { 
-                    labels: labels, 
-                    datasets: [{ 
-                        label: '% Avance', 
-                        data: ratesYTD, 
-                        borderColor: '#00306b', 
-                        backgroundColor: 'rgba(0, 48, 107, 0.1)', 
-                        fill: true, 
-                        tension: 0.3, 
-                        pointBackgroundColor: '#00306b',
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }] 
-                },
+                data: { labels: labels, datasets: [{ 
+                    label: '% Avance', 
+                    data: ratesYTD, 
+                    borderColor: '#00306b', 
+                    backgroundColor: 'rgba(0, 48, 107, 0.1)', 
+                    fill: true, 
+                    tension: 0.3, 
+                    pointBackgroundColor: '#00306b',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }] },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
@@ -1593,6 +1605,7 @@
             Object.keys(activeFilters).forEach(k => activeFilters[k] = []);
             const searchEl = document.getElementById('table-search');
             if (searchEl) searchEl.value = "";
+            
             setPeriodoPresupuestario(''); 
             selectMostRecentPeriod(); 
             renderYearSelectors(); 
@@ -1617,10 +1630,6 @@
         }
 
         function formatMillions(val) { return (val || 0).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
-
-        function showToast(message, iconClass) {
-            console.log(`[Notificación]: ${message}`);
-        }
 
         function loadDemoData() {
             const temp = [];
