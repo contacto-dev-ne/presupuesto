@@ -94,13 +94,11 @@
         <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
             
             <aside class="w-full lg:w-72 shrink-0 bg-white rounded-xl shadow-sm border border-slate-200 self-start overflow-hidden">
-                <!-- CABECERA PARA MOVILES (Colapsador) -->
                 <button onclick="toggleSidebarFilters()" class="w-full flex items-center justify-between p-4 lg:hidden bg-slate-50 border-b border-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors">
                     <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-[#00306b]"></i> Filtros y Segmentadores</span>
                     <i id="sidebar-toggle-icon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
                 </button>
 
-                <!-- CONTENIDO DEL SIDEBAR -->
                 <div id="sidebar-content" class="hidden lg:block">
                     <div class="p-5 space-y-5">
                         <div class="items-center justify-between pb-3 border-b border-slate-100 hidden lg:flex">
@@ -113,7 +111,6 @@
                             </button>
                         </div>
 
-                        <!-- Botón limpiar visible en móvil -->
                         <div class="lg:hidden flex justify-end">
                             <button onclick="resetFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                                 <i class="fa-solid fa-eraser"></i> Limpiar Filtros
@@ -135,7 +132,6 @@
 
                             <div>
                                 <label for="filter-region" class="block text-[11px] font-semibold text-slate-600 mb-1">Región del Proyecto</label>
-                                <!-- Se mantiene select simple porque es base de otros cálculos (Socio Maule) -->
                                 <select id="filter-region" onchange="onRegionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all font-medium">
                                     <option value="">Todas las Regiones</option>
                                 </select>
@@ -244,7 +240,6 @@
                     </button>
                 </div>
 
-                <!-- PESTAÑA: ANÁLISIS DEL PERIODO -->
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
                     
                     <div id="maule-cchc-panel" class="hidden bg-gradient-to-r from-blue-50/60 to-slate-100/60 border border-blue-100 rounded-2xl p-5 shadow-sm space-y-4 shrink-0">
@@ -399,7 +394,6 @@
                                 <canvas id="chart-type-expense"></canvas>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -565,13 +559,9 @@
         const rowsPerPage = 10;
         let activeTab = 'dashboard';
 
-        // Variables de filtro dinámico múltiple
+        // Variables de filtro dinámico múltiple originalizadas para este dashboard
         const activeFilters = {
-            ministerio: [],
             servicio: [],
-            subtitulo: [],
-            sector: [],
-            etapa: [],
             provincia: [],
             comuna: [],
             estado: [],
@@ -586,12 +576,10 @@
         let chartHistoricalComparisonInstance = null;
         let chartHistoricalRateInstance = null;
 
-        // Al iniciar carga silenciosa en segundo plano
         window.addEventListener('load', () => {
             autoSyncOnLoad();
         });
 
-        // Toggle para ocultar barra de filtros en móviles
         function toggleSidebarFilters() {
             const content = document.getElementById('sidebar-content');
             const icon = document.getElementById('sidebar-toggle-icon');
@@ -604,7 +592,6 @@
             }
         }
 
-        // Cerrar dropdowns de filtros si se clickea afuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.filter-wrapper')) {
                 document.querySelectorAll('[id^="dropdown-"]').forEach(d => d.classList.add('hidden'));
@@ -679,7 +666,6 @@
             document.getElementById('landing-view').classList.remove('hidden');
         }
 
-        // --- SISTEMA DESCOMPRESOR EN CALIENTE SEGURO ---
         async function fetchAndDecompressGzip(url) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
@@ -689,28 +675,26 @@
             return JSON.parse(decompressedString);
         }
 
-        // --- ESCANER DE VENTANA INDEPENDIENTE ---
         async function fetchGzipDataset(baseUrl) {
             let loadedRows = [];
             const startYear = 2020;
             const endYear = 2035;
 
             for (let year = startYear; year <= endYear; year++) {
-                const fileName = `datos_${year}.json.gz`; // Ruta corregida según instrucciones
+                const fileName = `datos_${year}.json.gz`; 
                 const url = `${baseUrl}${fileName}`;
                 
                 try {
                     const rawJson = await fetchAndDecompressGzip(url);
                     const normalizedRows = parseRawJson(rawJson, year.toString());
                     loadedRows = loadedRows.concat(normalizedRows);
-                    console.log(`Unificado exitosamente: ${fileName}`);
                 } catch (e) {
-                    // Ignora errores 404 de archivos inexistentes silenciosamente
+                    // Ignora silenciosamente
                 }
             }
 
             if (loadedRows.length === 0) {
-                throw new Error("No se encontraron registros financieros vigentes.");
+                throw new Error("No se encontraron registros.");
             }
             return loadedRows;
         }
@@ -733,7 +717,6 @@
             return isNaN(num) ? 0 : num;
         }
 
-        // --- PARSER DE FECHA EXCEL SERIAL CORRECTOR ---
         function parseExecutionDate(dateStr) {
             if (!dateStr) return null;
             const s = dateStr.toString().trim();
@@ -851,7 +834,7 @@
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
             } catch (err) {
-                console.warn("Fallo general. Iniciando simulación estructural local.", err);
+                console.warn("Fallo de red. Iniciando datos locales de prueba.", err);
                 loadDemoData();
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
@@ -888,22 +871,14 @@
         function populateSelectors() {
             const selectRegion = document.getElementById('filter-region');
             const prevRegion = selectRegion.value;
-            const regiones = new Set(), ministerios = new Set(), servicios = new Set(), provincias = new Set(), comunas = new Set(), sectores = new Set(), etapas = new Set(), estados = new Set(), gastos = new Set(), ajustes = new Set();
-            const subtitulosMap = {}; 
+            const regiones = new Set(), servicios = new Set(), provincias = new Set(), comunas = new Set(), estados = new Set(), gastos = new Set(), ajustes = new Set();
             const periodData = currentDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
 
             periodData.forEach(row => {
                 if (row.region) regiones.add(row.region);
 
-                // Solo alimentar los demás filtros si coinciden con la Región seleccionada (si hay una)
                 if (!prevRegion || row.region === prevRegion) {
-                    if (row.ministerio) ministerios.add(row.ministerio);
-                    if (activeFilters.ministerio.length === 0 || activeFilters.ministerio.includes(row.ministerio)) {
-                        if (row.servicio) servicios.add(row.servicio);
-                    }
-                    if (row.subtitulo_texto && row.subtitulo_texto !== 'Sin Subtítulo') subtitulosMap[row.subtitulo_texto] = row.subtitulo_num;
-                    if (row.sector) sectores.add(row.sector);
-                    if (row.etapa) etapas.add(row.etapa);
+                    if (row.servicio) servicios.add(row.servicio);
                     if (row.estado) estados.add(row.estado);
                     if (row.tipo_de_gasto) gastos.add(row.tipo_de_gasto);
                     if (row.ajuste_contrato) ajustes.add(row.ajuste_contrato);
@@ -915,21 +890,14 @@
                 }
             });
 
-            // Región sigue siendo simple para gatillar lógica de socio
             buildSelectOptions(selectRegion, Array.from(regiones).sort(), "Todas las Regiones", prevRegion);
 
-            buildMultiSelectOptions('ministerio', Array.from(ministerios).sort(), "Todos los Ministerios");
             buildMultiSelectOptions('servicio', Array.from(servicios).sort(), "Todas las Direcciones");
-            buildMultiSelectOptions('sector', Array.from(sectores).sort(), "Todos los Sectores");
-            buildMultiSelectOptions('etapa', Array.from(etapas).sort(), "Todas las Etapas");
             buildMultiSelectOptions('provincia', Array.from(provincias).sort(), "Todas");
             buildMultiSelectOptions('comuna', Array.from(comunas).sort(), "Todas");
             buildMultiSelectOptions('estado', Array.from(estados).sort(), "Todos los Estados");
             buildMultiSelectOptions('gasto', Array.from(gastos).sort(), "Todos los Tipos");
             buildMultiSelectOptions('ajuste', Array.from(ajustes).sort(), "Todos los Ajustes");
-
-            const sortedSubtitulos = Object.entries(subtitulosMap).sort((a, b) => a[1] - b[1]).map(e => e[0]);
-            buildMultiSelectOptions('subtitulo', sortedSubtitulos, "Todos los Subtítulos");
         }
 
         function buildSelectOptions(selectElement, list, defaultLabel, prevValue) {
@@ -1078,14 +1046,10 @@
                 if (row.rowYear !== yr || row.rowMonthIdx !== mIdx) return false;
                 
                 if (filterRegion && row.region !== filterRegion) return false;
-                if (filterSocio && row.region.toLowerCase().includes('maule') && row.socio_maule !== filterSocio) return false;
+                if (filterSocio && row.region && row.region.toLowerCase().includes('maule') && row.socio_maule !== filterSocio) return false;
                 if (filterPeriodoPresupuestario && row.periodo_presupuestario !== filterPeriodoPresupuestario) return false;
                 
-                if (activeFilters.ministerio.length > 0 && !activeFilters.ministerio.includes(row.ministerio)) return false;
                 if (activeFilters.servicio.length > 0 && !activeFilters.servicio.includes(row.servicio)) return false;
-                if (activeFilters.subtitulo.length > 0 && !activeFilters.subtitulo.includes(row.subtitulo_texto)) return false;
-                if (activeFilters.sector.length > 0 && !activeFilters.sector.includes(row.sector)) return false;
-                if (activeFilters.etapa.length > 0 && !activeFilters.etapa.includes(row.etapa)) return false;
                 if (activeFilters.provincia.length > 0 && !activeFilters.provincia.includes(row.provincia)) return false;
                 if (activeFilters.comuna.length > 0 && !activeFilters.comuna.includes(row.comuna)) return false;
                 if (activeFilters.estado.length > 0 && !activeFilters.estado.includes(row.estado)) return false;
@@ -1143,30 +1107,19 @@
             const filterRegionVal = document.getElementById('filter-region').value.toLowerCase();
             const maulePanel = document.getElementById('maule-cchc-panel');
 
-            if (filterRegionVal.includes('maule') || (filteredDataset.length > 0 && periodData.some(r => r.region.toLowerCase().includes('maule')))) {
+            if (filterRegionVal.includes('maule') || (filteredDataset.length > 0 && periodData.some(r => r.region && r.region.toLowerCase().includes('maule')))) {
                 maulePanel.classList.remove('hidden');
                 let totalMauleExecutedNoSocioFilter = 0, totalMauleSelectedSocioExecuted = 0, promedioMauleSum = 0, promedioMauleCount = 0;
                 const filterSocio = document.getElementById('filter-socio').value;
 
                 const mauleDatasetIgnoringSocioFilter = currentDataset.filter(row => {
                     if (row.rowYear !== activeYear || row.rowMonthIdx !== activeMonthIdx) return false;
-                    if (!row.region.toLowerCase().includes('maule')) return false;
+                    if (!row.region || !row.region.toLowerCase().includes('maule')) return false;
                     const fReg = document.getElementById('filter-region').value;
-                    const fServ = document.getElementById('filter-servicio').value;
-                    const fProv = document.getElementById('filter-provincia').value;
-                    const fCom = document.getElementById('filter-comuna').value;
-                    const fEst = document.getElementById('filter-estado').value;
-                    const fGast = document.getElementById('filter-gasto').value;
-
                     if (fReg && row.region !== fReg) return false;
-                    if (fServ && row.servicio !== fServ) return false;
                     if (filterPeriodoPresupuestario && row.periodo_presupuestario !== filterPeriodoPresupuestario) return false;
                     
-                    if (activeFilters.ministerio.length > 0 && !activeFilters.ministerio.includes(row.ministerio)) return false;
                     if (activeFilters.servicio.length > 0 && !activeFilters.servicio.includes(row.servicio)) return false;
-                    if (activeFilters.subtitulo.length > 0 && !activeFilters.subtitulo.includes(row.subtitulo_texto)) return false;
-                    if (activeFilters.sector.length > 0 && !activeFilters.sector.includes(row.sector)) return false;
-                    if (activeFilters.etapa.length > 0 && !activeFilters.etapa.includes(row.etapa)) return false;
                     if (activeFilters.provincia.length > 0 && !activeFilters.provincia.includes(row.provincia)) return false;
                     if (activeFilters.comuna.length > 0 && !activeFilters.comuna.includes(row.comuna)) return false;
                     if (activeFilters.estado.length > 0 && !activeFilters.estado.includes(row.estado)) return false;
@@ -1204,7 +1157,7 @@
             let headHTML = `<tr><th class="py-2.5 px-3 text-left bg-slate-100 text-slate-600 font-bold border-b border-slate-200 hidden md:table-cell md:sticky md:left-0 z-20 min-w-[200px]">Ajuste Contrato \\ Periodo</th>`;
             headHTML += `<th class="py-2.5 px-3 text-left bg-slate-100 text-slate-600 font-bold border-b border-slate-200 md:hidden min-w-[150px]">Ajuste Contrato</th>`;
             colCategories.forEach(col => { headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200 min-w-[120px]">${col}</th>`; });
-            headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200 min-w-[120px]">Total General</th></tr>`;
+            headHTML += `<th class="py-2.5 px-3 text-right font-bold text-[#00306b] min-w-[120px]">Total General</th></tr>`;
             thead.innerHTML = headHTML;
 
             let grandTotal = 0; periodData.forEach(r => grandTotal += (r.pagado_año || 0));
@@ -1225,21 +1178,23 @@
                     periodData.forEach(r => { if ((r.ajuste_contrato || "Sin Ajuste") === rowCat && r.periodo_presupuestario === colCat) cellSum += (r.pagado_año || 0); });
                     rowTotal += cellSum; colTotals[colIdx] += cellSum;
                     const cellPct = grandTotal > 0 ? ((cellSum / grandTotal) * 100).toFixed(1) : "0.0";
-                    rowsHTML += `<td class="py-3 px-3 text-right border-b border-slate-100 font-medium"><div>$${formatMillions(cellSum)}</div><div class="text-[10px] text-slate-400">${cellPct}%</div></td>`;
+                    let pctHTML = cellSum > 0 ? `<span class="text-[9px] text-slate-400 block mt-0.5">(${cellPct}%)</span>` : '';
+                    rowsHTML += `<td class="py-3 px-3 text-right border-b border-slate-100 font-medium"><div>$${formatMillions(cellSum)}</div>${pctHTML}</td>`;
                 });
                 const rowPct = grandTotal > 0 ? ((rowTotal / grandTotal) * 100).toFixed(1) : "0.0";
-                rowsHTML += `<td class="py-3 px-3 text-right font-bold text-slate-900 bg-slate-50/50 border-b border-slate-100"><div>$${formatMillions(rowTotal)}</div><div class="text-[10px] text-slate-500">${rowPct}%</div></td></tr>`;
+                rowsHTML += `<td class="py-3 px-3 text-right font-bold text-[#00306b] bg-slate-50/50 border-b border-slate-100"><div>$${formatMillions(rowTotal)}</div><span class="text-[9px] text-blue-500 block mt-0.5">(${rowPct}%)</span></td></tr>`;
             });
 
-            let footerHTML = `<tr class="bg-blue-50/40 font-bold border-t border-slate-200">`;
-            footerHTML += `<td class="py-3 px-3 text-slate-900 hidden md:table-cell md:sticky md:left-0 bg-slate-100 z-10 whitespace-nowrap">Total General</td>`;
-            footerHTML += `<td class="py-3 px-3 text-slate-900 md:hidden bg-slate-100 z-10">Total General</td>`;
+            let footerHTML = `<tr class="bg-slate-100 font-bold text-[#00306b] border-t-2 border-slate-200">`;
+            footerHTML += `<td class="py-3 px-3 text-slate-900 hidden md:table-cell md:sticky md:left-0 bg-slate-100 z-10 whitespace-nowrap">TOTAL GENERAL</td>`;
+            footerHTML += `<td class="py-3 px-3 text-slate-900 md:hidden bg-slate-100 z-10">TOTAL GENERAL</td>`;
             
             colCategories.forEach((colCat, colIdx) => {
                 const colTotal = colTotals[colIdx]; const colPct = grandTotal > 0 ? ((colTotal / grandTotal) * 100).toFixed(1) : "0.0";
-                footerHTML += `<td class="py-3 px-3 text-right text-blue-900"><div>$${formatMillions(colTotal)}</div><div class="text-[10px] text-blue-700 font-semibold">${colPct}%</div></td>`;
+                let pctColHTML = colTotal > 0 ? `<span class="text-[9px] text-blue-500 block mt-0.5">(${colPct}%)</span>` : '';
+                footerHTML += `<td class="py-3 px-3 text-right">$${formatMillions(colTotal)}${pctColHTML}</td>`;
             });
-            footerHTML += `<td class="py-3 px-3 text-right text-blue-900 bg-blue-50"><div>$${formatMillions(grandTotal)}</div><div class="text-[10px] text-blue-800 font-bold">100.0%</div></td></tr>`;
+            footerHTML += `<td class="py-3 px-3 text-right text-emerald-700">$${formatMillions(grandTotal)}<span class="text-[9px] text-emerald-600 block mt-0.5">(100%)</span></td></tr>`;
             tbody.innerHTML = rowsHTML + footerHTML;
         }
 
@@ -1262,7 +1217,7 @@
                 let diffAbs = 0, diffPct = 0, diffAbsHTML = `<span class="text-slate-400">—</span>`, diffPctHTML = `<span class="text-slate-400">—</span>`;
                 if (index > 0 && lastYearData) {
                     diffAbs = data.executed - lastYearData.executed;
-                    diffPct = data.rate - lastYearData.rate; // Correccion Var Puntos Porcentuales
+                    diffPct = data.rate - lastYearData.rate; 
                     
                     const colorAbs = diffAbs >= 0 ? 'text-emerald-600' : 'text-red-500';
                     const signAbs = diffAbs > 0 ? '+' : '';
@@ -1446,14 +1401,6 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    onHover: (event, chartElement) => {
-                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
-                    },
-                    onClick: (e, activeElements) => {
-                        if (activeElements.length > 0) {
-                            // Asignación no tiene filtro en este layout, solo visual.
-                        }
-                    },
                     plugins: {
                         legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
                         tooltip: {
@@ -1548,7 +1495,7 @@
             const pageData = activePeriodRows.slice(startIndex, endIndex);
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">No se encontraron registros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">No se encontraron registros en este filtro.</td></tr>`;
                 return;
             }
 
