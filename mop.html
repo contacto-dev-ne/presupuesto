@@ -91,124 +91,143 @@
             </div>
         </header>
 
-        <div class="bg-blue-50 border-b border-blue-100 py-2.5 px-4">
-            <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-blue-800 font-medium sm:px-6 lg:px-8">
-                <div class="flex items-center space-x-2 overflow-hidden">
-                    <i class="fa-solid fa-circle-info text-blue-600 shrink-0"></i>
-                    <span class="truncate">Los reportes financieros se consolidan estrictamente según la variable de fecha de control registrada.</span>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" class="text-blue-500 hover:text-blue-700 ml-2">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-
         <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
             
-            <aside class="w-full lg:w-72 shrink-0 bg-white rounded-xl shadow-sm border border-slate-200 p-5 self-start space-y-5">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-brand"></i>
-                        Segmentadores
-                    </h2>
-                    <button onclick="resetFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                        Limpiar
-                    </button>
-                </div>
+            <aside class="w-full lg:w-72 shrink-0 bg-white rounded-xl shadow-sm border border-slate-200 self-start overflow-hidden">
+                <!-- CABECERA PARA MOVILES (Colapsador) -->
+                <button onclick="toggleSidebarFilters()" class="w-full flex items-center justify-between p-4 lg:hidden bg-slate-50 border-b border-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-[#00306b]"></i> Filtros y Segmentadores</span>
+                    <i id="sidebar-toggle-icon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                </button>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Año del Reporte</label>
-                    <div id="filter-years-container" class="grid grid-cols-3 gap-1.5 font-semibold"></div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mes del Reporte</label>
-                    <div id="filter-months-container" class="grid grid-cols-4 gap-1 text-[11px] font-medium"></div>
-                </div>
-
-                <div class="border-t border-slate-100 pt-4 space-y-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Filtros de Clasificación</h3>
-
-                    <div>
-                        <label for="filter-region" class="block text-[11px] font-semibold text-slate-600 mb-1">Región del Proyecto</label>
-                        <select id="filter-region" onchange="onRegionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all font-medium">
-                            <option value="">Todas las Regiones</option>
-                        </select>
-                    </div>
-
-                    <div id="filter-socio-container" class="bg-amber-50/50 p-2.5 rounded-lg border border-amber-100 transition-all opacity-40 pointer-events-none">
-                        <label for="filter-socio" class="block text-[11px] font-bold text-amber-800 mb-1 flex items-center gap-1">
-                            <i class="fa-solid fa-users-rectangle"></i>
-                            Socio Maule CChC
-                        </label>
-                        <select id="filter-socio" onchange="applyFilters()" class="w-full bg-white border border-amber-200 rounded-lg p-1.5 text-xs text-amber-900 focus:outline-none focus:border-amber-500 transition-all font-semibold">
-                            <option value="">Todos (Socios y No Socios)</option>
-                            <option value="Socio Empresa">Socio Empresa</option>
-                            <option value="No socio CChC Maule">No socio CChC Maule</option>
-                            <option value="Varios proveedores">Varios proveedores</option>
-                            <option value="No hay datos">No hay datos</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="filter-servicio" class="block text-[11px] font-semibold text-slate-600 mb-1">Dirección / Servicio / Subdirección</label>
-                        <select id="filter-servicio" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all">
-                            <option value="">Todas las Direcciones</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="filter-ajuste" class="block text-[11px] font-semibold text-slate-600 mb-1">Ajuste de Contrato</label>
-                        <select id="filter-ajuste" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all">
-                            <option value="">Todos los Ajustes</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Periodo Presupuestario</label>
-                        <div class="grid grid-cols-3 gap-1">
-                            <button onclick="setPeriodoPresupuestario('')" id="btn-periodo-all" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-[#00306b] text-white border-[#00306b] transition-all">Todos</button>
-                            <button onclick="setPeriodoPresupuestario('Arrastre')" id="btn-periodo-arrastre" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all">Arrastre</button>
-                            <button onclick="setPeriodoPresupuestario('Nuevo')" id="btn-periodo-nuevo" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all">Nuevo</button>
+                <!-- CONTENIDO DEL SIDEBAR -->
+                <div id="sidebar-content" class="hidden lg:block">
+                    <div class="p-5 space-y-5">
+                        <div class="items-center justify-between pb-3 border-b border-slate-100 hidden lg:flex">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-brand"></i>
+                                Segmentadores
+                            </h2>
+                            <button onclick="resetFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                Limpiar
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Botón limpiar visible en móvil -->
+                        <div class="lg:hidden flex justify-end">
+                            <button onclick="resetFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+                            </button>
+                        </div>
+
                         <div>
-                            <label for="filter-provincia" class="block text-[11px] font-semibold text-slate-600 mb-1">Provincia</label>
-                            <select id="filter-provincia" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:outline-none">
-                                <option value="">Todas</option>
-                            </select>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Año del Reporte</label>
+                            <div id="filter-years-container" class="grid grid-cols-3 gap-1.5 font-semibold"></div>
                         </div>
+
                         <div>
-                            <label for="filter-comuna" class="block text-[11px] font-semibold text-slate-600 mb-1">Comuna</label>
-                            <select id="filter-comuna" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:outline-none">
-                                <option value="">Todas</option>
-                            </select>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mes del Reporte</label>
+                            <div id="filter-months-container" class="grid grid-cols-4 gap-1 text-[11px] font-medium"></div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-4 space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Filtros de Clasificación</h3>
+
+                            <div>
+                                <label for="filter-region" class="block text-[11px] font-semibold text-slate-600 mb-1">Región del Proyecto</label>
+                                <!-- Se mantiene select simple porque es base de otros cálculos (Socio Maule) -->
+                                <select id="filter-region" onchange="onRegionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all font-medium">
+                                    <option value="">Todas las Regiones</option>
+                                </select>
+                            </div>
+
+                            <div id="filter-socio-container" class="bg-amber-50/50 p-2.5 rounded-lg border border-amber-100 transition-all opacity-40 pointer-events-none">
+                                <label for="filter-socio" class="block text-[11px] font-bold text-amber-800 mb-1 flex items-center gap-1">
+                                    <i class="fa-solid fa-users-rectangle"></i>
+                                    Socio Maule CChC
+                                </label>
+                                <select id="filter-socio" onchange="applyFilters()" class="w-full bg-white border border-amber-200 rounded-lg p-1.5 text-xs text-amber-900 focus:outline-none focus:border-amber-500 transition-all font-semibold">
+                                    <option value="">Todos (Socios y No Socios)</option>
+                                    <option value="Socio Empresa">Socio Empresa</option>
+                                    <option value="No socio CChC Maule">No socio CChC Maule</option>
+                                    <option value="Varios proveedores">Varios proveedores</option>
+                                    <option value="No hay datos">No hay datos</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-wrapper relative">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Dirección / Servicio / Subdirección</label>
+                                <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-servicio', event)">
+                                    <span id="label-servicio" class="truncate pr-2">Todas las Direcciones</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                </div>
+                                <div id="dropdown-servicio" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+
+                            <div class="filter-wrapper relative">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ajuste de Contrato</label>
+                                <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-ajuste', event)">
+                                    <span id="label-ajuste" class="truncate pr-2">Todos los Ajustes</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                </div>
+                                <div id="dropdown-ajuste" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Periodo Presupuestario</label>
+                                <div class="grid grid-cols-3 gap-1">
+                                    <button onclick="setPeriodoPresupuestario('')" id="btn-periodo-all" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-[#00306b] text-white border-[#00306b] transition-all">Todos</button>
+                                    <button onclick="setPeriodoPresupuestario('Arrastre')" id="btn-periodo-arrastre" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all">Arrastre</button>
+                                    <button onclick="setPeriodoPresupuestario('Nuevo')" id="btn-periodo-nuevo" class="py-1 px-1.5 rounded border text-[10px] font-bold bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition-all">Nuevo</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="filter-wrapper relative">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Provincia</label>
+                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-provincia', event)">
+                                        <span id="label-provincia" class="truncate pr-2">Todas</span>
+                                        <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                                    </div>
+                                    <div id="dropdown-provincia" class="hidden absolute z-50 w-[150%] mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1 left-0"></div>
+                                </div>
+                                <div class="filter-wrapper relative">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Comuna</label>
+                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-comuna', event)">
+                                        <span id="label-comuna" class="truncate pr-2">Todas</span>
+                                        <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                                    </div>
+                                    <div id="dropdown-comuna" class="hidden absolute z-50 w-[150%] mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1 right-0"></div>
+                                </div>
+                            </div>
+
+                            <div class="filter-wrapper relative">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Estado</label>
+                                <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-estado', event)">
+                                    <span id="label-estado" class="truncate pr-2">Todos los Estados</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                </div>
+                                <div id="dropdown-estado" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+
+                            <div class="filter-wrapper relative">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tipo de Gasto</label>
+                                <div class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 hover:border-blue-400 transition-all flex items-center justify-between cursor-pointer" onclick="toggleMultiSelect('dropdown-gasto', event)">
+                                    <span id="label-gasto" class="truncate pr-2">Todos los Tipos</span>
+                                    <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                </div>
+                                <div id="dropdown-gasto" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100 text-[11px] text-slate-500 space-y-1.5 mt-5">
+                            <div class="font-semibold text-slate-600 flex items-center gap-1">
+                                <i class="fa-solid fa-file-contract text-[#00306b]"></i>
+                                <span>Contratos vigentes</span>
+                            </div>
+                            <p id="period-info-label" class="text-slate-600 font-semibold">Cargando...</p>
                         </div>
                     </div>
-
-                    <div>
-                        <label for="filter-estado" class="block text-[11px] font-semibold text-slate-600 mb-1">Estado</label>
-                        <select id="filter-estado" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none">
-                            <option value="">Todos los Estados</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="filter-gasto" class="block text-[11px] font-semibold text-slate-600 mb-1">Tipo de Gasto</label>
-                        <select id="filter-gasto" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 focus:outline-none">
-                            <option value="">Todos los Tipos</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 rounded-lg p-3 border border-slate-100 text-[11px] text-slate-500 space-y-1.5">
-                    <div class="font-semibold text-slate-600 flex items-center gap-1">
-                        <i class="fa-solid fa-file-contract text-[#00306b]"></i>
-                        <span>Contratos vigentes</span>
-                    </div>
-                    <p id="period-info-label" class="text-slate-600 font-semibold">Cargando...</p>
                 </div>
             </aside>
 
@@ -225,9 +244,10 @@
                     </button>
                 </div>
 
+                <!-- PESTAÑA: ANÁLISIS DEL PERIODO (Estadística Pura) -->
                 <div id="tab-content-dashboard" class="space-y-6 overflow-y-auto pr-1 flex-grow custom-scrollbar">
                     
-                    <div id="maule-cchc-panel" class="hidden bg-gradient-to-r from-blue-50/60 to-slate-100/60 border border-blue-100 rounded-2xl p-5 shadow-sm space-y-4">
+                    <div id="maule-cchc-panel" class="hidden bg-gradient-to-r from-blue-50/60 to-slate-100/60 border border-blue-100 rounded-2xl p-5 shadow-sm space-y-4 shrink-0">
                         <div class="flex items-center justify-between border-b border-blue-100 pb-3">
                             <div class="flex items-center space-x-2.5 text-[#00306b]">
                                 <i class="fa-solid fa-users-rectangle text-xl"></i>
@@ -262,50 +282,62 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-blue-50 p-3 rounded-lg text-[#00306b] shrink-0">
-                                <i class="fa-solid fa-wallet text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Prog. + Ejecutado Año</p>
-                                <h3 id="kpi-budget" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">$0 MM</h3>
-                                <p id="kpi-budget-sub" class="text-[10px] text-slate-400 truncate">Programado + Pagado</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-emerald-50 p-3 rounded-lg text-emerald-600 shrink-0">
-                                <i class="fa-solid fa-handholding-dollar text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Ejecutado YTD</p>
-                                <h3 id="kpi-executed" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">$0 MM</h3>
-                                <p id="kpi-executed-sub" class="text-[10px] text-slate-400 truncate">Real a la fecha</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-blue-50/80 p-3 rounded-lg text-blue-600 shrink-0">
-                                <i class="fa-solid fa-percent text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden w-full">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">% Contratos con Avance</p>
-                                <h3 id="kpi-percentage" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">0%</h3>
-                                <div class="w-full bg-slate-100 rounded-full h-1 mt-1">
-                                    <div id="kpi-percentage-bar" class="bg-[#00306b] h-1 rounded-full" style="width: 0%"></div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
+                        <button onclick="toggleKPIs()" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-bold text-sm border-b border-slate-100">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-[#00306b]"></i>
+                                Resumen de Indicadores Clave (KPIs)
+                            </span>
+                            <i id="kpi-toggle-icon" class="fa-solid fa-chevron-up transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div id="kpi-collapsible-section" class="p-4 transition-all duration-300">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg text-[#00306b] shrink-0">
+                                        <i class="fa-solid fa-wallet text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Prog. + Ejecutado Año</p>
+                                        <h3 id="kpi-budget" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">$0 MM</h3>
+                                        <p id="kpi-budget-sub" class="text-[11px] text-slate-400 mt-0.5">Programado + Pagado</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-200 flex items-center space-x-4">
-                            <div class="bg-slate-50 p-3 rounded-lg text-slate-500 shrink-0">
-                                <i class="fa-solid fa-file-contract text-xl md:text-2xl"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Contratos Evaluados</p>
-                                <h3 id="kpi-contracts" class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate">0</h3>
-                                <p id="kpi-contracts-sub" class="text-[10px] text-slate-400 truncate">Reportados en el periodo</p>
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-emerald-50 p-4 rounded-lg text-emerald-600 shrink-0">
+                                        <i class="fa-solid fa-handholding-dollar text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Ejecutado YTD</p>
+                                        <h3 id="kpi-executed" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">$0 MM</h3>
+                                        <p id="kpi-executed-sub" class="text-[11px] text-slate-400 mt-0.5">Real a la fecha</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-blue-50/80 p-4 rounded-lg text-blue-600 shrink-0">
+                                        <i class="fa-solid fa-percent text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">% Contratos con Avance</p>
+                                        <h3 id="kpi-percentage" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0%</h3>
+                                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                                            <div id="kpi-percentage-bar" class="bg-[#00306b] h-1.5 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100 flex items-center space-x-4">
+                                    <div class="bg-slate-50 p-4 rounded-lg text-slate-500 shrink-0">
+                                        <i class="fa-solid fa-file-contract text-2xl md:text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight mb-1">Contratos Evaluados</p>
+                                        <h3 id="kpi-contracts" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0</h3>
+                                        <p id="kpi-contracts-sub" class="text-[11px] text-slate-400 mt-0.5">Reportados en el periodo</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -324,22 +356,41 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-building text-[#00306b]"></i>
-                                    Inversión por Dirección / Servicio / Subdirección
+                                    Inversión por Dirección / Servicio
                                 </h3>
                                 <span class="text-xs text-slate-400">Escala en MM$</span>
                             </div>
-                            <div class="chart-container">
-                                <canvas id="chart-services"></canvas>
+                            <div class="overflow-y-auto custom-scrollbar pr-2" style="height: 280px; position: relative;">
+                                <div id="chart-services-wrapper" style="position: relative; width: 100%;">
+                                    <canvas id="chart-services"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 xl:col-span-1 flex flex-col justify-between">
+                    <!-- MATRIZ Y DONUT -->
+                    <div class="flex flex-col gap-6">
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-table-cells text-[#00306b]"></i>
+                                    Matriz: Ajuste Contrato vs. Periodo Presupuestario (MM$ Ejecutados YTD)
+                                </h3>
+                            </div>
+                            <div class="overflow-auto flex-grow max-h-[350px] w-full custom-scrollbar relative">
+                                <table class="w-full text-left border-collapse text-xs min-w-[500px]">
+                                    <thead id="cross-table-head" class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200 md:sticky top-0 z-20"></thead>
+                                    <tbody id="cross-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-pie-chart text-[#00306b]"></i>
@@ -351,35 +402,35 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 xl:col-span-2 overflow-hidden flex flex-col">
-                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                                <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                    <i class="fa-solid fa-table-cells text-[#00306b]"></i>
-                                    Matriz: Ajuste Contrato vs. Periodo Presupuestario (MM$ Ejecutados YTD)
-                                </h3>
-                            </div>
-                            <div class="overflow-auto flex-grow max-h-[250px] custom-scrollbar">
-                                <table class="w-full text-left border-collapse text-xs min-w-[400px]">
-                                    <thead id="cross-table-head" class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100 sticky top-0 z-10"></thead>
-                                    <tbody id="cross-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                                </table>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
+                <!-- PESTAÑA: COMPARATIVA HISTÓRICA (KPIs, Gráficos + Tabla Detallada) -->
                 <div id="tab-content-historical" class="space-y-6 hidden overflow-y-auto pr-1 flex-grow custom-scrollbar">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Variación Ejecución YoY</p>
-                            <h3 id="historical-kpi-diff-abs" class="text-xl font-bold mt-1 text-slate-800">$0 MM</h3>
-                            <p id="historical-kpi-diff-abs-sub" class="text-[10px] text-slate-500 mt-1">Diferencia respecto al año anterior</p>
-                        </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
+                        <button onclick="toggleHistKPIs()" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-bold text-sm border-b border-slate-100">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-[#00306b]"></i>
+                                Resumen de Variaciones Históricas (YTD a <span id="historical-kpi-month-name">Mes</span>)
+                            </span>
+                            <i id="hist-kpi-toggle-icon" class="fa-solid fa-chevron-up transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div id="hist-kpi-collapsible-section" class="p-4 transition-all duration-300">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Variación Ejecución YoY</p>
+                                    <h3 id="historical-kpi-diff-abs" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">$0 MM</h3>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Diferencia respecto al año anterior</p>
+                                </div>
 
-                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">% Variación YoY</p>
-                            <h3 id="historical-kpi-diff-pct" class="text-xl font-bold mt-1 text-slate-800">0%</h3>
-                            <p id="historical-kpi-diff-pct-sub" class="text-[10px] text-slate-500 mt-1">Variación relativa interanual</p>
+                                <div class="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">% Variación YoY</p>
+                                    <h3 id="historical-kpi-diff-pct" class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">0%</h3>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Variación relativa interanual</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -387,11 +438,11 @@
                         <div class="p-5 border-b border-slate-100">
                             <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                 <i class="fa-solid fa-table text-[#00306b]"></i>
-                                Tabla de Análisis Histórico Comparativo (YTD a <span class="text-blue-600 font-bold" id="historical-table-month-name">Mes</span>)
+                                Tabla de Análisis Histórico Comparativo
                             </h3>
                             <p class="text-xs text-slate-400 mt-1">Comparación paralela del desempeño financiero al mismo mes de cada año.</p>
                         </div>
-                        <div class="overflow-x-auto custom-scrollbar">
+                        <div class="overflow-x-auto w-full custom-scrollbar">
                             <table class="w-full text-left border-collapse text-xs min-w-[700px]">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
@@ -401,7 +452,7 @@
                                         <th class="py-3 px-4 text-right">Ejecutado YTD (MM$)</th>
                                         <th class="py-3 px-4 text-center">Avance del programa (%)</th>
                                         <th class="py-3 px-4 text-right">Var. Absoluta (MM$)</th>
-                                        <th class="py-3 px-4 text-center">Var. Relativa (%)</th>
+                                        <th class="py-3 px-4 text-center">Var. Relativa</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historical-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
@@ -427,7 +478,7 @@
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                                 <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-chart-line text-[#00306b]"></i>
-                                    Evolución Tasa de Avance Presupuestario (%)
+                                    Evolución Tasa de Avance Presupuestario
                                 </h3>
                                 <span class="text-xs text-slate-400" id="historical-chart-line-subtitle">YTD</span>
                             </div>
@@ -436,55 +487,55 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
-                    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-table-list text-[#00306b]"></i>
-                                Listado Detallado de Ejecución de Contratos
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
-                        </div>
-                        
-                        <div class="flex flex-wrap items-center gap-2">
-                            <div class="relative">
-                                <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar contratista, BIP, ID..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0 mt-6">
+                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-table-list text-[#00306b]"></i>
+                                    Listado Detallado de Ejecución de Contratos
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Mostrando contratos vigentes para el periodo seleccionado</p>
                             </div>
                             
-                            <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                                <span>Exportar CSV</span>
-                            </button>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="relative">
+                                    <input type="text" id="table-search" oninput="applyFilters()" placeholder="Buscar contratista, BIP, ID..." class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 text-xs text-slate-700 focus:outline-none focus:border-blue-500 transition-all w-56">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                </div>
+                                
+                                <button onclick="exportToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                                    <span>Exportar CSV</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse text-xs min-w-[900px]">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
-                                    <th class="py-3 px-4">BIP / ID MP</th>
-                                    <th class="py-3 px-4">Contrato</th>
-                                    <th class="py-3 px-4">Servicio (Dirección)</th>
-                                    <th class="py-3 px-4">Ubicación</th>
-                                    <th class="py-3 px-4 text-right">Monto Vigente</th>
-                                    <th class="py-3 px-4 text-right">Ajuste</th>
-                                    <th class="py-3 px-4 text-right">Ejecutado YTD</th>
-                                    <th class="py-3 px-4 text-center">Ejecución física reportada</th>
-                                    <th class="py-3 px-4 text-center">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                        </table>
-                    </div>
+                        <div class="overflow-x-auto w-full custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs min-w-[900px]">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
+                                        <th class="py-3 px-4">BIP / ID MP</th>
+                                        <th class="py-3 px-4">Contrato</th>
+                                        <th class="py-3 px-4">Servicio (Dirección)</th>
+                                        <th class="py-3 px-4">Ubicación</th>
+                                        <th class="py-3 px-4 text-right">Monto Vigente</th>
+                                        <th class="py-3 px-4 text-right">Ajuste</th>
+                                        <th class="py-3 px-4 text-right">Ejecutado YTD</th>
+                                        <th class="py-3 px-4 text-center">Ejecución física reportada</th>
+                                        <th class="py-3 px-4 text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
 
-                    <div class="bg-slate-50 border-t border-slate-100 px-5 py-3.5 flex items-center justify-between text-xs text-slate-500">
-                        <div id="table-info-pagination">Mostrando 0-0 de 0 registros</div>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="changePage(-1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-prev-page">Anterior</button>
-                            <button onclick="changePage(1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-next-page">Siguiente</button>
+                        <div class="bg-slate-50 border-t border-slate-100 px-5 py-3.5 flex items-center justify-between text-xs text-slate-500">
+                            <div id="table-info-pagination">Mostrando 0-0 de 0 registros</div>
+                            <div class="flex items-center space-x-1.5">
+                                <button onclick="changePage(-1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-prev-page">Anterior</button>
+                                <button onclick="changePage(1)" class="p-1 px-2.5 rounded border border-slate-200 hover:bg-white transition-all disabled:opacity-50" id="btn-next-page">Siguiente</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -516,6 +567,20 @@
         const rowsPerPage = 10;
         let activeTab = 'dashboard';
 
+        // Variables de filtro dinámico múltiple
+        const activeFilters = {
+            ministerio: [],
+            servicio: [],
+            subtitulo: [],
+            sector: [],
+            etapa: [],
+            provincia: [],
+            comuna: [],
+            estado: [],
+            gasto: [],
+            ajuste: []
+        };
+
         // Gráficos (Instancias de Chart.js)
         let chartMonthlyInstance = null;
         let chartServicesInstance = null;
@@ -527,6 +592,82 @@
         window.addEventListener('load', () => {
             autoSyncOnLoad();
         });
+
+        // Cerrar dropdowns de filtros si se clickea afuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filter-wrapper')) {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(d => d.classList.add('hidden'));
+            }
+        });
+
+        function toggleSidebarFilters() {
+            const content = document.getElementById('sidebar-content');
+            const icon = document.getElementById('sidebar-toggle-icon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        function toggleMultiSelect(id, event) {
+            event.stopPropagation();
+            const el = document.getElementById(id);
+            document.querySelectorAll('[id^="dropdown-"]').forEach(d => {
+                if (d.id !== id) d.classList.add('hidden');
+            });
+            el.classList.toggle('hidden');
+        }
+
+        function handleMultiSelectChange(filterKey, value, isChecked) {
+            if (value === 'ALL') {
+                activeFilters[filterKey] = [];
+            } else {
+                if (isChecked) {
+                    if (!activeFilters[filterKey].includes(value)) {
+                        activeFilters[filterKey].push(value);
+                    }
+                } else {
+                    activeFilters[filterKey] = activeFilters[filterKey].filter(v => v !== value);
+                }
+            }
+            applyFilters();
+        }
+
+        function applyFilterFromChart(filterKey, value) {
+            if (activeFilters[filterKey].includes(value)) {
+                activeFilters[filterKey] = activeFilters[filterKey].filter(v => v !== value);
+            } else {
+                activeFilters[filterKey].push(value);
+            }
+            applyFilters();
+        }
+
+        function toggleKPIs() {
+            const section = document.getElementById('kpi-collapsible-section');
+            const icon = document.getElementById('kpi-toggle-icon');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.classList.remove('rotate-180');
+            } else {
+                section.classList.add('hidden');
+                icon.classList.add('rotate-180');
+            }
+        }
+
+        function toggleHistKPIs() {
+            const section = document.getElementById('hist-kpi-collapsible-section');
+            const icon = document.getElementById('hist-kpi-toggle-icon');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.classList.remove('rotate-180');
+            } else {
+                section.classList.add('hidden');
+                icon.classList.add('rotate-180');
+            }
+        }
 
         function enterDashboard() {
             document.getElementById('landing-view').classList.add('hidden');
@@ -731,7 +872,11 @@
             if (currentDataset.length === 0) return;
             let newestYear = yearsList[0];
             let newestMonthIdx = 0;
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             for (let m = 11; m >= 0; m--) {
+                if (newestYear === currentYearStr && m >= currentMonthIdx) continue;
                 if (currentDataset.some(row => row.rowYear === newestYear && row.rowMonthIdx === m)) {
                     newestMonthIdx = m;
                     break;
@@ -743,37 +888,47 @@
 
         function populateSelectors() {
             const selectRegion = document.getElementById('filter-region');
-            const selectServicio = document.getElementById('filter-servicio');
-            const selectProvincia = document.getElementById('filter-provincia');
-            const selectComuna = document.getElementById('filter-comuna');
-            const selectEstado = document.getElementById('filter-estado');
-            const selectGasto = document.getElementById('filter-gasto');
-            const selectAjuste = document.getElementById('filter-ajuste');
-
-            const prevRegion = selectRegion.value; const prevServicio = selectServicio.value;
-            const prevProvincia = selectProvincia.value; const prevComuna = selectComuna.value;
-            const prevEstado = selectEstado.value; const prevGasto = selectGasto.value; const prevAjuste = selectAjuste.value;
-
-            const regiones = new Set(), servicios = new Set(), provincias = new Set(), comunas = new Set(), estados = new Set(), gastos = new Set(), ajustes = new Set();
+            const prevRegion = selectRegion.value;
+            const regiones = new Set(), ministerios = new Set(), servicios = new Set(), provincias = new Set(), comunas = new Set(), sectores = new Set(), etapas = new Set(), estados = new Set(), gastos = new Set(), ajustes = new Set();
+            const subtitulosMap = {}; 
             const periodData = currentDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
 
             periodData.forEach(row => {
                 if (row.region) regiones.add(row.region);
-                if (row.servicio) servicios.add(row.servicio);
-                if (row.estado) estados.add(row.estado);
-                if (row.tipo_de_gasto) gastos.add(row.tipo_de_gasto);
-                if (row.ajuste_contrato) ajustes.add(row.ajuste_contrato);
-                if (!prevRegion || row.region === prevRegion) { if (row.provincia) provincias.add(row.provincia); }
-                if ((!prevRegion || row.region === prevRegion) && (!prevProvincia || row.provincia === prevProvincia)) { if (row.comuna) comunas.add(row.comuna); }
+
+                if (!prevRegion || row.region === prevRegion) {
+                    if (row.ministerio) ministerios.add(row.ministerio);
+                    if (activeFilters.ministerio.length === 0 || activeFilters.ministerio.includes(row.ministerio)) {
+                        if (row.servicio) servicios.add(row.servicio);
+                    }
+                    if (row.subtitulo_texto && row.subtitulo_texto !== 'Sin Subtítulo') subtitulosMap[row.subtitulo_texto] = row.subtitulo_num;
+                    if (row.sector) sectores.add(row.sector);
+                    if (row.etapa) etapas.add(row.etapa);
+                    if (row.estado) estados.add(row.estado);
+                    if (row.tipo_de_gasto) gastos.add(row.tipo_de_gasto);
+                    if (row.ajuste_contrato) ajustes.add(row.ajuste_contrato);
+                    if (row.provincia) provincias.add(row.provincia);
+                    
+                    if (activeFilters.provincia.length === 0 || activeFilters.provincia.includes(row.provincia)) {
+                        if (row.comuna) comunas.add(row.comuna);
+                    }
+                }
             });
 
             buildSelectOptions(selectRegion, Array.from(regiones).sort(), "Todas las Regiones", prevRegion);
-            buildSelectOptions(selectServicio, Array.from(servicios).sort(), "Todas las Direcciones", prevServicio);
-            buildSelectOptions(selectProvincia, Array.from(provincias).sort(), "Todas", prevProvincia);
-            buildSelectOptions(selectComuna, Array.from(comunas).sort(), "Todas", prevComuna);
-            buildSelectOptions(selectEstado, Array.from(estados).sort(), "Todos los Estados", prevEstado);
-            buildSelectOptions(selectGasto, Array.from(gastos).sort(), "Todos los Tipos", prevGasto);
-            buildSelectOptions(selectAjuste, Array.from(ajustes).sort(), "Todos los Ajustes", prevAjuste);
+
+            buildMultiSelectOptions('ministerio', Array.from(ministerios).sort(), "Todos los Ministerios");
+            buildMultiSelectOptions('servicio', Array.from(servicios).sort(), "Todas las Direcciones");
+            buildMultiSelectOptions('sector', Array.from(sectores).sort(), "Todos los Sectores");
+            buildMultiSelectOptions('etapa', Array.from(etapas).sort(), "Todas las Etapas");
+            buildMultiSelectOptions('provincia', Array.from(provincias).sort(), "Todas");
+            buildMultiSelectOptions('comuna', Array.from(comunas).sort(), "Todas");
+            buildMultiSelectOptions('estado', Array.from(estados).sort(), "Todos los Estados");
+            buildMultiSelectOptions('gasto', Array.from(gastos).sort(), "Todos los Tipos");
+            buildMultiSelectOptions('ajuste', Array.from(ajustes).sort(), "Todos los Ajustes");
+
+            const sortedSubtitulos = Object.entries(subtitulosMap).sort((a, b) => a[1] - b[1]).map(e => e[0]);
+            buildMultiSelectOptions('subtitulo', sortedSubtitulos, "Todos los Subtítulos");
         }
 
         function buildSelectOptions(selectElement, list, defaultLabel, prevValue) {
@@ -785,6 +940,53 @@
                     selectElement.appendChild(opt);
                 }
             });
+        }
+
+        function buildMultiSelectOptions(filterKey, list, defaultLabel) {
+            const dropdown = document.getElementById(`dropdown-${filterKey}`);
+            const labelEl = document.getElementById(`label-${filterKey}`);
+            if (!dropdown || !labelEl) return;
+
+            dropdown.innerHTML = '';
+            const isAllSelected = activeFilters[filterKey].length === 0;
+            
+            let html = `
+                <label class="flex items-center px-2 py-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs">
+                    <input type="checkbox" class="mr-2 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                        onchange="handleMultiSelectChange('${filterKey}', 'ALL', this.checked)"
+                        ${isAllSelected ? 'checked' : ''}>
+                    <span class="font-semibold text-slate-700">${defaultLabel}</span>
+                </label>
+                <div class="h-px bg-slate-100 my-1"></div>
+            `;
+
+            list.forEach(val => {
+                if (val && val !== "N/A" && val !== "S/I") {
+                    const isChecked = activeFilters[filterKey].includes(val);
+                    const safeVal = val.replace(/'/g, "\\'");
+                    html += `
+                        <label class="flex items-center px-2 py-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs transition-colors">
+                            <input type="checkbox" value="${val}" class="mr-2 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                onchange="handleMultiSelectChange('${filterKey}', '${safeVal}', this.checked)"
+                                ${isChecked ? 'checked' : ''}>
+                            <span class="text-slate-600">${val}</span>
+                        </label>
+                    `;
+                }
+            });
+            
+            dropdown.innerHTML = html;
+
+            if (activeFilters[filterKey].length === 0) {
+                labelEl.textContent = defaultLabel;
+                labelEl.classList.remove('font-bold', 'text-[#00306b]');
+            } else if (activeFilters[filterKey].length === 1) {
+                labelEl.textContent = activeFilters[filterKey][0];
+                labelEl.classList.add('font-bold', 'text-[#00306b]');
+            } else {
+                labelEl.textContent = `${activeFilters[filterKey].length} seleccionados`;
+                labelEl.classList.add('font-bold', 'text-[#00306b]');
+            }
         }
 
         function onRegionChange() { applyFilters(); }
@@ -813,13 +1015,21 @@
 
         function renderYearSelectors() {
             const container = document.getElementById('filter-years-container'); container.innerHTML = '';
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             yearsList.forEach(yr => {
                 const isSelected = (yr === activeYear);
                 const btn = document.createElement('button');
                 btn.className = `py-1.5 px-2 rounded-lg text-xs font-bold transition-all border text-center ${isSelected ? 'bg-[#00306b] text-white border-[#00306b] shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`;
                 btn.textContent = yr;
                 btn.onclick = () => {
-                    activeYear = yr; renderYearSelectors(); renderMonthSelectors(); applyFilters();
+                    activeYear = yr; 
+                    if (activeYear === currentYearStr && activeMonthIdx >= currentMonthIdx) {
+                        activeMonthIdx = currentMonthIdx - 1;
+                        if (activeMonthIdx < 0) activeMonthIdx = 0;
+                    }
+                    renderYearSelectors(); renderMonthSelectors(); applyFilters();
                 };
                 container.appendChild(btn);
             });
@@ -827,57 +1037,79 @@
 
         function renderMonthSelectors() {
             const container = document.getElementById('filter-months-container'); container.innerHTML = '';
+            const currentYearStr = new Date().getFullYear().toString();
+            const currentMonthIdx = new Date().getMonth();
+
             MONTH_NAMES.forEach((mName, mIdx) => {
                 const isSelected = (mIdx === activeMonthIdx);
+                let isBlocked = (activeYear === currentYearStr && mIdx >= currentMonthIdx);
                 const btn = document.createElement('button');
-                const hasData = currentDataset.some(row => row.rowYear === activeYear && row.rowMonthIdx === mIdx);
-                btn.className = `py-1.5 px-1 rounded-lg text-[10px] font-semibold transition-all border text-center relative ${isSelected ? 'bg-[#00306b] text-white border-[#00306b] shadow-sm' : hasData ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100 font-bold' : 'bg-slate-100 text-slate-300 border-slate-100 opacity-40 cursor-not-allowed'}`;
-                btn.textContent = mName.substring(0, 3);
-                if (hasData && !isSelected) {
-                    const dot = document.createElement('span'); dot.className = "absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full";
-                    btn.appendChild(dot);
+
+                if (isBlocked) {
+                    btn.className = `py-1.5 px-1 rounded-lg text-[10px] truncate bg-slate-50 text-slate-300 cursor-not-allowed border border-slate-100 opacity-60`;
+                    btn.disabled = true;
+                    btn.title = `Mes no disponible en el año en curso (${mName})`;
+                } else {
+                    const hasData = currentDataset.some(row => row.rowYear === activeYear && row.rowMonthIdx === mIdx);
+                    btn.className = `py-1.5 px-1 rounded-lg text-[10px] font-semibold transition-all border text-center relative ${isSelected ? 'bg-[#00306b] text-white border-[#00306b] shadow-sm' : hasData ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100 font-bold' : 'bg-slate-100 text-slate-300 border-slate-100 opacity-40 cursor-not-allowed'}`;
+                    
+                    if (hasData && !isSelected) {
+                        const dot = document.createElement('span'); dot.className = "absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full";
+                        btn.appendChild(dot);
+                    }
+                    btn.onclick = () => {
+                        if (!hasData) return;
+                        activeMonthIdx = mIdx; renderMonthSelectors(); applyFilters();
+                    };
                 }
-                btn.onclick = () => {
-                    if (!hasData) return;
-                    activeMonthIdx = mIdx; renderMonthSelectors(); applyFilters();
-                };
+                
+                btn.textContent = mName.substring(0, 3);
                 container.appendChild(btn);
             });
         }
 
-        function applyFilters() {
-            populateSelectors();
+        function getFilteredDataForHistorical(yr, mIdx) {
             const filterRegion = document.getElementById('filter-region').value;
             const filterSocio = document.getElementById('filter-socio').value;
-            const filterServicio = document.getElementById('filter-servicio').value;
-            const filterProvincia = document.getElementById('filter-provincia').value;
-            const filterComuna = document.getElementById('filter-comuna').value;
-            const filterEstado = document.getElementById('filter-estado').value;
-            const filterGasto = document.getElementById('filter-gasto').value;
-            const filterAjuste = document.getElementById('filter-ajuste').value;
-            const searchVal = document.getElementById('table-search').value.toLowerCase().trim();
+            const searchVal = document.getElementById('table-search')?.value.toLowerCase().trim() || "";
 
-            updateSocioMauleVisibility(filterRegion);
-
-            filteredDataset = currentDataset.filter(row => {
+            return currentDataset.filter(row => {
+                if (row.rowYear !== yr || row.rowMonthIdx !== mIdx) return false;
+                
                 if (filterRegion && row.region !== filterRegion) return false;
                 if (filterSocio && row.region.toLowerCase().includes('maule') && row.socio_maule !== filterSocio) return false;
-                if (filterServicio && row.servicio !== filterServicio) return false;
-                if (filterAjuste && row.ajuste_contrato !== filterAjuste) return false;
                 if (filterPeriodoPresupuestario && row.periodo_presupuestario !== filterPeriodoPresupuestario) return false;
-                if (filterProvincia && row.provincia !== filterProvincia) return false;
-                if (filterComuna && row.comuna !== filterComuna) return false;
-                if (filterEstado && row.estado !== filterEstado) return false;
-                if (filterGasto && row.tipo_de_gasto !== filterGasto) return false;
+                
+                if (activeFilters.ministerio.length > 0 && !activeFilters.ministerio.includes(row.ministerio)) return false;
+                if (activeFilters.servicio.length > 0 && !activeFilters.servicio.includes(row.servicio)) return false;
+                if (activeFilters.subtitulo.length > 0 && !activeFilters.subtitulo.includes(row.subtitulo_texto)) return false;
+                if (activeFilters.sector.length > 0 && !activeFilters.sector.includes(row.sector)) return false;
+                if (activeFilters.etapa.length > 0 && !activeFilters.etapa.includes(row.etapa)) return false;
+                if (activeFilters.provincia.length > 0 && !activeFilters.provincia.includes(row.provincia)) return false;
+                if (activeFilters.comuna.length > 0 && !activeFilters.comuna.includes(row.comuna)) return false;
+                if (activeFilters.estado.length > 0 && !activeFilters.estado.includes(row.estado)) return false;
+                if (activeFilters.gasto.length > 0 && !activeFilters.gasto.includes(row.tipo_de_gasto)) return false;
+                if (activeFilters.ajuste.length > 0 && !activeFilters.ajuste.includes(row.ajuste_contrato)) return false;
+
                 if (searchVal) {
                     const searchString = `${row.bip} ${row.nombre_contrato} ${row.nombre_contratista}`.toLowerCase();
                     if (!searchString.includes(searchVal)) return false;
                 }
                 return true;
             });
+        }
 
-            const activePeriodRows = filteredDataset.filter(r => r.rowYear === activeYear && r.rowMonthIdx === activeMonthIdx);
-            document.getElementById('period-info-label').innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${activePeriodRows.length} contratos activos.`;
+        function filterData() {
+            filteredDataset = getFilteredDataForHistorical(activeYear, activeMonthIdx);
+        }
+
+        function applyFilters() {
+            populateSelectors();
+            const filterRegion = document.getElementById('filter-region').value;
+            updateSocioMauleVisibility(filterRegion);
+            filterData();
+
+            document.getElementById('period-info-label').innerHTML = `Reporte: <span class="text-blue-600 font-bold">${MONTH_NAMES[activeMonthIdx]} ${activeYear}</span><br>Mostrando ${filteredDataset.length} contratos activos.`;
 
             currentPage = 1;
             if (activeTab === 'dashboard') {
@@ -961,16 +1193,25 @@
             const rowCategories = Array.from(new Set(periodData.map(r => r.ajuste_contrato || "Sin Ajuste"))).sort();
             const colCategories = ["Arrastre", "Nuevo"]; 
 
-            let headHTML = `<tr><th class="py-2.5 px-3 text-left bg-slate-100 text-slate-600 font-bold border-b border-slate-200">Ajuste Contrato \\ Periodo</th>`;
-            colCategories.forEach(col => { headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200">${col}</th>`; });
-            headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200">Total General</th></tr>`;
+            let headHTML = `<tr><th class="py-2.5 px-3 text-left bg-slate-100 text-slate-600 font-bold border-b border-slate-200 hidden md:table-cell md:sticky md:left-0 z-20 min-w-[200px]">Ajuste Contrato \\ Periodo</th>`;
+            headHTML += `<th class="py-2.5 px-3 text-left bg-slate-100 text-slate-600 font-bold border-b border-slate-200 md:hidden min-w-[150px]">Ajuste Contrato</th>`;
+            colCategories.forEach(col => { headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200 min-w-[120px]">${col}</th>`; });
+            headHTML += `<th class="py-2.5 px-3 text-right bg-slate-100 text-slate-600 font-bold border-b border-slate-200 min-w-[120px]">Total General</th></tr>`;
             thead.innerHTML = headHTML;
 
             let grandTotal = 0; periodData.forEach(r => grandTotal += (r.pagado_año || 0));
             let colTotals = new Array(colCategories.length).fill(0); let rowsHTML = "";
 
+            if (rowCategories.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colCategories.length + 2}" class="text-center py-6 text-slate-400">No hay datos para cruzar.</td></tr>`;
+                return;
+            }
+
             rowCategories.forEach(rowCat => {
-                let rowTotal = 0; rowsHTML += `<tr class="hover:bg-slate-50 transition-colors"><td class="py-3 px-3 font-semibold text-slate-800 border-b border-slate-100">${rowCat}</td>`;
+                let rowTotal = 0; rowsHTML += `<tr class="hover:bg-slate-50 transition-colors">`;
+                rowsHTML += `<td onclick="applyFilterFromChart('ajuste', '${rowCat}')" class="py-3 px-3 font-semibold text-slate-800 border-b border-slate-100 hidden md:table-cell md:sticky md:left-0 bg-white z-10 cursor-pointer hover:bg-blue-50 hover:text-blue-700 whitespace-nowrap">${rowCat}</td>`;
+                rowsHTML += `<td onclick="applyFilterFromChart('ajuste', '${rowCat}')" class="py-3 px-3 font-semibold text-slate-800 border-b border-slate-100 md:hidden bg-white z-10 cursor-pointer hover:bg-blue-50 hover:text-blue-700">${rowCat}</td>`;
+                
                 colCategories.forEach((colCat, colIdx) => {
                     let cellSum = 0;
                     periodData.forEach(r => { if ((r.ajuste_contrato || "Sin Ajuste") === rowCat && r.periodo_presupuestario === colCat) cellSum += (r.pagado_año || 0); });
@@ -982,7 +1223,10 @@
                 rowsHTML += `<td class="py-3 px-3 text-right font-bold text-slate-900 bg-slate-50/50 border-b border-slate-100"><div>$${formatMillions(rowTotal)}</div><div class="text-[10px] text-slate-500">${rowPct}%</div></td></tr>`;
             });
 
-            let footerHTML = `<tr class="bg-blue-50/40 font-bold border-t border-slate-200 sticky bottom-0"><td class="py-3 px-3 text-slate-900">Total General</td>`;
+            let footerHTML = `<tr class="bg-blue-50/40 font-bold border-t border-slate-200">`;
+            footerHTML += `<td class="py-3 px-3 text-slate-900 hidden md:table-cell md:sticky md:left-0 bg-slate-100 z-10 whitespace-nowrap">Total General</td>`;
+            footerHTML += `<td class="py-3 px-3 text-slate-900 md:hidden bg-slate-100 z-10">Total General</td>`;
+            
             colCategories.forEach((colCat, colIdx) => {
                 const colTotal = colTotals[colIdx]; const colPct = grandTotal > 0 ? ((colTotal / grandTotal) * 100).toFixed(1) : "0.0";
                 footerHTML += `<td class="py-3 px-3 text-right text-blue-900"><div>$${formatMillions(colTotal)}</div><div class="text-[10px] text-blue-700 font-semibold">${colPct}%</div></td>`;
@@ -1008,13 +1252,13 @@
                 let diffAbs = 0, diffPct = 0, diffAbsHTML = `<span class="text-slate-400">—</span>`, diffPctHTML = `<span class="text-slate-400">—</span>`;
                 if (index > 0 && lastYearData) {
                     diffAbs = data.executed - lastYearData.executed;
-                    diffPct = lastYearData.executed > 0 ? ((diffAbs / lastYearData.executed) * 100) : 0;
+                    diffPct = data.rate - lastYearData.rate;
                     if (diffAbs > 0) {
                         diffAbsHTML = `<span class="text-green-600 font-semibold">+${formatMillions(diffAbs)} MM</span>`;
-                        diffPctHTML = `<span class="text-green-600 font-semibold"><i class="fa-solid fa-caret-up mr-0.5"></i>+${diffPct.toFixed(1)}%</span>`;
+                        diffPctHTML = `<span class="text-green-600 font-semibold"><i class="fa-solid fa-caret-up mr-0.5"></i>+${diffPct.toFixed(1)} pp</span>`;
                     } else if (diffAbs < 0) {
                         diffAbsHTML = `<span class="text-red-600 font-semibold">${formatMillions(diffAbs)} MM</span>`;
-                        diffPctHTML = `<span class="text-red-600 font-semibold"><i class="fa-solid fa-caret-down mr-0.5"></i>${diffPct.toFixed(1)}%</span>`;
+                        diffPctHTML = `<span class="text-red-600 font-semibold"><i class="fa-solid fa-caret-down mr-0.5"></i>${diffPct.toFixed(1)} pp</span>`;
                     }
                 }
                 if (data.year === activeYear) { currentYearDiffAbs = diffAbs; currentYearDiffPct = diffPct; }
@@ -1037,13 +1281,14 @@
             const kpiAbs = document.getElementById('historical-kpi-diff-abs'); const kpiPct = document.getElementById('historical-kpi-diff-pct');
 
             if (currentYearDiffAbs > 0) {
-                kpiAbs.textContent = `+$${formatMillions(currentYearDiffAbs)} MM`; kpiAbs.className = "text-xl font-bold mt-1 text-green-600";
-                kpiPct.textContent = `+${currentYearDiffPct.toFixed(1)}%`; kpiPct.className = "text-xl font-bold mt-1 text-green-600";
+                kpiAbs.textContent = `+$${formatMillions(currentYearDiffAbs)} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-green-600";
+                kpiPct.textContent = `+${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-green-600";
             } else if (currentYearDiffAbs < 0) {
-                kpiAbs.textContent = `-$${formatMillions(Math.abs(currentYearDiffAbs))} MM`; kpiAbs.className = "text-xl font-bold mt-1 text-red-600";
-                kpiPct.textContent = `${currentYearDiffPct.toFixed(1)}%`; kpiPct.className = "text-xl font-bold mt-1 text-red-600";
+                kpiAbs.textContent = `-$${formatMillions(Math.abs(currentYearDiffAbs))} MM`; kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-red-600";
+                kpiPct.textContent = `${currentYearDiffPct.toFixed(1)} pp`; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-red-600";
             } else {
-                kpiAbs.textContent = `$0,0 MM`; kpiPct.textContent = `0.0%`;
+                kpiAbs.textContent = `$0,0 MM`; kpiPct.textContent = `0.0 pp`;
+                kpiAbs.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800"; kpiPct.className = "text-xl md:text-2xl font-bold mt-1 text-slate-800";
             }
         }
 
@@ -1077,7 +1322,23 @@
                         { label: 'Proyección Programada', data: programmedData, borderColor: '#94a3b8', borderDash: [6, 4], fill: false, tension: 0.2 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            if(currentDataset.some(row => row.rowYear === activeYear && row.rowMonthIdx === index)){
+                                activeMonthIdx = index;
+                                renderMonthSelectors();
+                                applyFilters();
+                            }
+                        }
+                    } 
+                }
             });
             document.getElementById('chart-monthly-title').textContent = `Año Presupuestario: ${activeYear}`;
         }
@@ -1089,7 +1350,13 @@
                 const s = row.servicio; if (!grouped[s]) grouped[s] = { budget: 0, paid: 0 };
                 grouped[s].budget += (row.programado_mas_pagado_ano || 0); grouped[s].paid += (row.pagado_año || 0);
             });
-            const labels = Object.keys(grouped);
+            const labels = Object.keys(grouped).sort((a, b) => grouped[b].paid - grouped[a].paid);
+
+            const wrapper = document.getElementById('chart-services-wrapper');
+            if (wrapper) {
+                const requiredHeight = Math.max(280, labels.length * 45); 
+                wrapper.style.height = requiredHeight + 'px';
+            }
 
             const ctx = document.getElementById('chart-services').getContext('2d');
             if (chartServicesInstance) chartServicesInstance.destroy();
@@ -1102,7 +1369,46 @@
                         { label: 'Ejecutado YTD', data: labels.map(l => grouped[l].paid), backgroundColor: '#00306b' }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', axis: 'y', intersect: false },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (e, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const dataIndex = activeElements[0].index;
+                            // Encontrar nombre original por indice ordenado
+                            const originalLabel = labels[dataIndex];
+                            applyFilterFromChart('servicio', originalLabel);
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    const labelStr = this.getLabelForValue(value) || '';
+                                    return labelStr.length > 20 ? labelStr.substring(0, 20) + '...' : labelStr;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) { return tooltipItems[0].label; },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.x !== null) label += '$' + formatMillions(context.parsed.x) + ' MM';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -1134,6 +1440,17 @@
                         legend: {
                             position: 'bottom',
                             labels: { boxWidth: 10, font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let val = context.parsed;
+                                    let total = context.chart._metasets[context.datasetIndex].total;
+                                    let pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return `${label}: $${formatMillions(val)} MM (${pct}%)`;
+                                }
+                            }
                         }
                     }
                 }
@@ -1154,15 +1471,61 @@
             chartHistoricalComparisonInstance = new Chart(ctxBar, {
                 type: 'bar',
                 data: { labels: labels, datasets: [{ label: 'Presupuesto Año', data: budgetsYTD, backgroundColor: '#94a3b8' }, { label: 'Ejecutado YTD', data: executedYTD, backgroundColor: '#00306b' }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + formatMillions(context.parsed.y) + ' MM';
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             const ctxLine = document.getElementById('chart-historical-rate').getContext('2d');
             if (chartHistoricalRateInstance) chartHistoricalRateInstance.destroy();
             chartHistoricalRateInstance = new Chart(ctxLine, {
                 type: 'line',
-                data: { labels: labels, datasets: [{ label: '% Avance', data: ratesYTD, borderColor: '#00306b', fill: true, tension: 0.1 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        label: '% Avance', 
+                        data: ratesYTD, 
+                        borderColor: '#00306b', 
+                        backgroundColor: 'rgba(0, 48, 107, 0.1)', 
+                        fill: true, 
+                        tension: 0.3, 
+                        pointBackgroundColor: '#00306b',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'; 
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Tasa de Avance: ' + context.parsed.y.toFixed(1) + '%'; 
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -1225,11 +1588,32 @@
         }
 
         function resetFilters() {
-            document.getElementById('filter-region').value = ""; document.getElementById('filter-servicio').value = "";
-            document.getElementById('filter-provincia').value = ""; document.getElementById('filter-comuna').value = "";
-            document.getElementById('filter-estado').value = ""; document.getElementById('filter-gasto').value = "";
-            document.getElementById('filter-ajuste').value = ""; document.getElementById('table-search').value = "";
-            setPeriodoPresupuestario(''); selectMostRecentPeriod(); renderYearSelectors(); renderMonthSelectors(); applyFilters();
+            document.getElementById('filter-region').value = ""; 
+            document.getElementById('filter-socio').value = "";
+            Object.keys(activeFilters).forEach(k => activeFilters[k] = []);
+            const searchEl = document.getElementById('table-search');
+            if (searchEl) searchEl.value = "";
+            setPeriodoPresupuestario(''); 
+            selectMostRecentPeriod(); 
+            renderYearSelectors(); 
+            renderMonthSelectors(); 
+            applyFilters();
+        }
+
+        function exportToCSV() {
+            const activePeriodRows = filteredDataset.filter(row => row.rowYear === activeYear && row.rowMonthIdx === activeMonthIdx);
+            if (!activePeriodRows.length) return;
+            let csvContent = "data:text/csv;charset=utf-8,BIP,Contrato,Servicio,Provincia,Comuna,MontoVigente,EjecutadoYTD\n";
+            activePeriodRows.forEach(r => {
+                csvContent += `"${r.bip}","${r.nombre_contrato}","${r.servicio}","${r.provincia}","${r.comuna}",${r.monto_vigente_contr},${r.pagado_año}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Contratos_${activeYear}_${activeMonthIdx + 1}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function formatMillions(val) { return (val || 0).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
@@ -1243,7 +1627,7 @@
             for (let y = 2024; y <= 2026; y++) {
                 for (let m = 0; m <= 5; m++) {
                     temp.push({
-                        year: y.toString(), servicio: "Dirección de Arquitectura", region: "Arica y Parinacota", provincia: "ARICA", comuna: "ARICA", bip: "40053823-0", nombre_contrato: "CONSERVACION COMPLEJO FRONTERIZO CHACALLUTA", monto_vigente_contr: 16188, ajuste_contrato: "Sin Reajuste", programado_mas_pagado_ano: 5406304, pagado_ano: 5406304, presupuesto_ejecutado_millones_de_pesos: 5406, tipo_de_gasto: "Contratación de Obras", asignacion: "OBRAS CIVILES", estado: "En Ejecución", periodo_presupuestario: "Nuevo", promedio: 1, fecha_ejecucion: "46023"
+                        year: y.toString(), servicio: "Dirección de Arquitectura", region: "Arica y Parinacota", provincia: "ARICA", comuna: "ARICA", bip: "40053823-0", nombre_contrato: "CONSERVACION COMPLEJO FRONTERIZO CHACALLUTA", monto_vigente_contr: 16188000, ajuste_contrato: "Sin Reajuste", programado_mas_pagado_ano: 5406304000, pagado_ano: 5406304000, presupuesto_ejecutado_millones_de_pesos: 5406000, tipo_de_gasto: "Contratación de Obras", asignacion: "OBRAS CIVILES", estado: "En Ejecución", periodo_presupuestario: "Nuevo", promedio: 1, fecha_ejecucion: "46023", socio_maule: "No hay datos"
                     });
                 }
             }
