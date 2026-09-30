@@ -1200,7 +1200,8 @@
 
         function updateHistoricalKPIsAndTable() {
             const tbody = document.getElementById('historical-table-body'); tbody.innerHTML = '';
-            document.getElementById('historical-table-month-name').textContent = MONTH_NAMES[activeMonthIdx];
+            
+            // LÍNEA CORREGIDA (eliminada la referencia a historical-table-month-name que no existe)
             document.getElementById('historical-kpi-month-name').textContent = MONTH_NAMES[activeMonthIdx];
 
             const historicalData = []; const chronologicalYears = [...yearsList].reverse();
